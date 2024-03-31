@@ -30,7 +30,6 @@ namespace CookingRecipeApi.Services.RabbitMQServices
         }
         public void SetupConsumer()
         {
-            Console.WriteLine("Setting up consumer");
             var notificationConsumer = new EventingBasicConsumer(_channel);
             notificationConsumer.Received += async (model, ea) =>
             {
@@ -39,9 +38,9 @@ namespace CookingRecipeApi.Services.RabbitMQServices
                 await _notificationSemaphoreSlim.WaitAsync();
                 try
                 {
-                    Console.WriteLine("message");
                     var notificationTask = System.Text.Json.JsonSerializer.Deserialize<NotificationTask>(message);
-                    if(notificationTask != null)
+                    Console.WriteLine($" [x] Received {0}", notificationTask?.UserId??"");
+                    if (notificationTask != null)
                     {
                         await _sendNotification(notificationTask.Notification, notificationTask.UserId);
                     }

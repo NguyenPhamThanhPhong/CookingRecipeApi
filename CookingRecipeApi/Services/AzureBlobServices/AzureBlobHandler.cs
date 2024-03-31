@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using CookingRecipeApi.Configs;
+using System.Text.Json;
 
 namespace CookingRecipeApi.Services.AzureBlobServices
 {
@@ -19,7 +20,8 @@ namespace CookingRecipeApi.Services.AzureBlobServices
             foreach (var file in files)
             {
                 var fileguid = Guid.NewGuid().ToString();
-                var blobClient = _blobContainerClient.GetBlobClient(fileguid);
+                var fileName = $"{fileguid}.{file.FileName.Split('.').Last()}";
+                var blobClient = _blobContainerClient.GetBlobClient(fileName);
                 using (var stream = file.OpenReadStream())
                 {
                     await blobClient.UploadAsync(stream, true);
@@ -30,11 +32,13 @@ namespace CookingRecipeApi.Services.AzureBlobServices
         }
         public async Task<string?> UploadSingleBlob(IFormFile file)
         {
-            var fileguid = Guid.NewGuid().ToString();   
-            var blobClient = _blobContainerClient.GetBlobClient(fileguid);
+            var fileguid = Guid.NewGuid().ToString();
+            var fileName = $"{fileguid}.{file.FileName.Split('.').Last()}"; // concatenate guid with file extension
+            var blobClient = _blobContainerClient.GetBlobClient(fileName);
             using (var stream = file.OpenReadStream())
             {
-               await blobClient.UploadAsync(stream, true);
+               var result = await blobClient.UploadAsync(stream, true);
+                Console.WriteLine(JsonSerializer.Serialize(result));
             }
             return blobClient.Uri.AbsoluteUri;
         }

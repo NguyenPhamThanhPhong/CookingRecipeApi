@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CookingRecipeApi.Models;
 using CookingRecipeApi.RequestsResponses.LoginRequests;
+using CookingRecipeApi.Services.AuthenticationServices;
 using CookingRecipeApi.Services.BusinessServices.IServicies;
 using CookingRecipeApi.Services.BusinessServices.Services;
 using Microsoft.AspNetCore.Http;
@@ -13,12 +14,14 @@ namespace CookingRecipeApi.Controllers
     public class LoginController : ControllerBase
     {
         private readonly ILoginService _loginService;
+        private readonly TokenGenerator _tokenGenerator;
         private readonly IMapper _mapper;
 
-        public LoginController(ILoginService loginService, IMapper mapper)
+        public LoginController(ILoginService loginService, IMapper mapper, TokenGenerator tokenGenerator)
         {
             _loginService = loginService;
             _mapper = mapper;
+            _tokenGenerator = tokenGenerator;
         }
 
         [HttpPost("register")]
@@ -31,18 +34,26 @@ namespace CookingRecipeApi.Controllers
             }
             return Ok(user);
         }
+        //first time login
         [HttpPost("login")]
-        public Task<IActionResult> Login([FromBody] User user)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            return Task.FromResult<IActionResult>(Ok("LoginController"));
-        }
-        [HttpPost("logout")]
-        public Task<IActionResult> Logout([FromBody] User user)
-        {
-            return Task.FromResult<IActionResult>(Ok("LoginController"));
+            if(request.email == null || request.password == null)
+            {
+                return BadRequest("Invalid request");
+            }
+            var loginResult = await _loginService.LoginwithGmail(request.email,request.password);
+            if(loginResult == null)
+            {
+                return BadRequest("Invalid request");
+            }
+            //how to use anonymous object in c#
+
+            return Ok(new {accessToken=loginResult.Item1,refreshToken=loginResult.Item2,user=loginResult.Item3 });
         }
         [HttpPost("forgot-password")]
-        public Task<IActionResult> ForgotPassword([FromBody] User user)
+        // lấy userId ra từ token, gửi mail cái mật khẩu
+        public Task<IActionResult> ForgotPassword()
         {
             return Task.FromResult<IActionResult>(Ok("LoginController"));
         }

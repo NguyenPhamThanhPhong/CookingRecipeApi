@@ -39,12 +39,6 @@ namespace CookingRecipeApi.Configs
             NotificationBatchCollection = database.GetCollection<NotificationBatch>(NotificationBatchCollectionName);
         }
 
-        public void CreateIndex()
-        {
-            var indexKeysDefinition = Builders<User>.IndexKeys.Ascending(user => user.authenticationInfo.email);
-            var indexModel = new CreateIndexModel<User>(indexKeysDefinition);
-            UserCollection.Indexes.CreateOne(indexModel);
-        }
 
     }
 }

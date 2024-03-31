@@ -1,4 +1,5 @@
 ﻿using Azure.Storage.Blobs;
+using System.Text.Json;
 
 namespace CookingRecipeApi.Configs
 {
@@ -15,6 +16,8 @@ namespace CookingRecipeApi.Configs
         {
             this.BlobServiceClient = new BlobServiceClient(new Uri(this.SASUrl));
             this.BlobContainerClient = this.BlobServiceClient.GetBlobContainerClient(this.ContainerName);
+            Console.WriteLine(JsonSerializer.Serialize(this.BlobServiceClient));
+            Console.WriteLine(JsonSerializer.Serialize(this.BlobContainerClient));
         }
     }
 }

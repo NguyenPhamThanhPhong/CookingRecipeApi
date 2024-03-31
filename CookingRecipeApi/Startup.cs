@@ -2,6 +2,7 @@
 using CookingRecipeApi.Repositories.Interfaces;
 using CookingRecipeApi.Repositories.Repos;
 using CookingRecipeApi.Services.AuthenticationServices;
+using CookingRecipeApi.Services.AzureBlobServices;
 using CookingRecipeApi.Services.BusinessServices.IServicies;
 using CookingRecipeApi.Services.BusinessServices.Services;
 using CookingRecipeApi.Services.RabbitMQServices;
@@ -29,6 +30,9 @@ namespace CookingRecipeApi
             // rabbitMQ here
             services.ConfigRabbitMQ(config);
             services.ConfigCORS(config);
+
+            services.ConfigAzureBlob(config);
+            services.ConfigSMTP(config);
 
         }
         public static IServiceCollection ConfigDbContext(this IServiceCollection services, IConfiguration config)
@@ -105,7 +109,9 @@ namespace CookingRecipeApi
         {
             AzureBlobConfigs azureBlobConfigs = new AzureBlobConfigs();
             config.GetSection("AzureBlobConfigs").Bind(azureBlobConfigs);
+            azureBlobConfigs.Initialize();
             services.AddSingleton(azureBlobConfigs);
+            services.AddSingleton<AzureBlobHandler>();
             return services;
         }
         public static IServiceCollection ConfigSMTP(this IServiceCollection services, IConfiguration config)
