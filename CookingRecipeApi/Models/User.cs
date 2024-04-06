@@ -16,6 +16,7 @@ namespace CookingRecipeApi.Models
             this.savedRecipeIds = new List<string>();
             this.followingIds = new List<string>();
             this.followerIds = new List<string>();
+            this.loginTickets = new List<LoginTicket>();
         }
 
         [BsonId]
@@ -32,6 +33,7 @@ namespace CookingRecipeApi.Models
         public List<string> savedRecipeIds { get; set; }
         public List<string> followingIds { get; set; }
         public List<string> followerIds { get; set; }
+        public List<LoginTicket> loginTickets { get; set; }
     }
 
     public class AuthenticationInformation
@@ -65,6 +67,20 @@ namespace CookingRecipeApi.Models
             this.bio = string.Empty;
             this.categories = new List<string>();
             this.hungryHeads = 0;
+        }
+    }
+    public class LoginTicket
+    {
+        public string refreshToken { get; set; }
+        public string deviceInfo { get; set; }
+        public DateTime createTime { get; set; }
+        public DateTime expireTime { get; set; }
+        public LoginTicket(string refreshToken, string deviceInfo)
+        {
+            this.refreshToken = refreshToken;
+            this.deviceInfo = deviceInfo;
+            createTime = DateTime.UtcNow;
+            expireTime = DateTime.UtcNow.AddDays(30);
         }
     }
 }

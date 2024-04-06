@@ -14,7 +14,7 @@ namespace CookingRecipeApi.Configs
         public string password { get; set; }
         public int port { get; set; }
         public int taskLimit { get; set; }
-        public string userIdQueueName { get; set; }
+        public string followerIdQueueName { get; set; }
         public string notificationQueueName { get; set; }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 
@@ -30,7 +30,7 @@ namespace CookingRecipeApi.Configs
             };
             Connection = factory.CreateConnection();
             Channel = Connection.CreateModel();
-            Channel.QueueDeclare(queue: userIdQueueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+            Channel.QueueDeclare(queue: followerIdQueueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
             Channel.QueueDeclare(queue: notificationQueueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
         }
         public void Dispose()

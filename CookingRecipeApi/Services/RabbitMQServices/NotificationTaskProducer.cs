@@ -11,31 +11,33 @@ namespace CookingRecipeApi.Services.RabbitMQServices
         private readonly IConnection _connection;
         private readonly IModel _channel;
         private readonly string _notificationQueueName;
+        private readonly string _followerIdQueueName;
 
         public NotificationTaskProducer(MessageQueueConfigs messageQueueConfigs)
         {
             _connection = messageQueueConfigs.Connection;
             _channel = _connection.CreateModel();
             _notificationQueueName = messageQueueConfigs.notificationQueueName;
+            _followerIdQueueName = messageQueueConfigs.followerIdQueueName;
         }
-
+        //cái này sẽ đc trigger bởi consumer Phase 1
         public void EnqueueNotification(Notification notification,string userId)
         {
             var message = JsonSerializer.Serialize(new NotificationTask(notification,userId));
             var body = Encoding.UTF8.GetBytes(message);
             _channel.BasicPublish(exchange: "", routingKey: _notificationQueueName, basicProperties: null, body: body);
         }
-    }
-    //wrapper class
-    public class NotificationTask
-    {
-        public NotificationTask(Notification notification, string userId)
+        //enqueue user publisher id: 
+        //tìm tới DS các follower của user và enqueue vào queue thông báo (notification queue)
+        //cái này sẽ đc trigger đầu tiên
+        public void EnqueueUserPublisherId(string userId,
+            string message = "",string title = "new recipe",
+            string path="/")
         {
-            Notification = notification;
-            UserId = userId;
+            var itemMessage = JsonSerializer.Serialize(
+                new NotificationMessage(message:message,title:title,path:path,userId:userId));
+            var body = Encoding.UTF8.GetBytes(itemMessage);
+            _channel.BasicPublish(exchange: "", routingKey: _followerIdQueueName, basicProperties: null, body: body);
         }
-        public Notification Notification { get; set; }
-        public string UserId { get; set; }
-
     }
 }

@@ -34,25 +34,27 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var accessToken = _tokenGenerator.GenerateAccessToken(user);
             return new Tuple<string,string, User>(refreshToken,accessToken,user);
         }
-        public async Task<Tuple<string,User>?> LoginwithGoogle(string googleId)
+        public async Task<Tuple<string, string, User>?> LoginwithGoogle(string googleId)
         {
             var user = await _userCollection.Find(s=>s.authenticationInfo.googleId == googleId).FirstOrDefaultAsync();
             if(user.authenticationInfo.googleId!=googleId)
             {
                 return null;
             }
-            var token = _tokenGenerator.GenerateRefreshToken();
-            return new Tuple<string, User>(token,user);
+            var refreshToken = _tokenGenerator.GenerateRefreshToken();
+            var accessToken = _tokenGenerator.GenerateAccessToken(user);
+            return new Tuple<string, string, User>(refreshToken, accessToken, user);
         }
-        public async Task<Tuple<string, User>?> LoginwithFacebook(string facebookId)
+        public async Task<Tuple<string,string, User>?> LoginwithFacebook(string facebookId)
         {
             var user = await _userCollection.Find(s => s.authenticationInfo.facebookId == facebookId).FirstOrDefaultAsync();
             if (user.authenticationInfo.facebookId != facebookId)
             {
                 return null;
             }
-            var token = _tokenGenerator.GenerateRefreshToken();
-            return new Tuple<string, User>(token, user);
+            var refreshToken = _tokenGenerator.GenerateRefreshToken();
+            var accessToken = _tokenGenerator.GenerateAccessToken(user);
+            return new Tuple<string, string, User>(refreshToken, accessToken, user);
         }
         public async Task<User?> Register(RegisterRequest request)
         {
@@ -66,6 +68,21 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var user = _mapper.Map<User>(request);
             await _userRepository.CreateUser(user);
             return user;
+        }
+
+        public async Task<User?> GetUserfromRefreshToken(string refreshToken)
+        {
+            var filter = Builders<User>.Filter.ElemMatch(
+                s => s.loginTickets,
+                ticket=>ticket.refreshToken==refreshToken);
+            var user = await _userCollection.Find(filter).FirstOrDefaultAsync();
+            return user;
+        }
+        public async Task<string?> GetUserPassword(string userId)
+        {
+            var projection = Builders<User>.Projection.Include(x => x.authenticationInfo.password);
+            var password = await _userCollection.Find(s => s.id == userId).Project<string>(projection).FirstOrDefaultAsync();
+            return password;
         }
     }
 }

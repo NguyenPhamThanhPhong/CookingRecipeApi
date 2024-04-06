@@ -12,12 +12,11 @@ namespace CookingRecipeApi.Models
         public string instruction { get; set; }
         public DateTime createdAt { get; set; }
         public DateTime updatedAt { get; set; }
-        public List<string> attatchmentUrls { get; set; }
+        public List<string> attachmentUrls { get; set; }
         public int likes { get; set; }
         public List<string> commentBatchIds { get; set; }
         public TimeSpan cookTime { get; set; }
         public Dictionary<string, string> ingredients { get; set; }
-
         public bool isPublished { get; set; }
 
         public Recipe()
@@ -30,7 +29,7 @@ namespace CookingRecipeApi.Models
             isPublished = false;
             createdAt = DateTime.UtcNow;
             updatedAt = DateTime.UtcNow;
-            attatchmentUrls = new List<string>();
+            attachmentUrls = new List<string>();
             commentBatchIds = new List<string>();
             ingredients = new Dictionary<string, string>();
         }

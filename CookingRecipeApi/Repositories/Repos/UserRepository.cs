@@ -14,25 +14,35 @@ namespace CookingRecipeApi.Repositories.Repos
             _userCollection = databaseConfigs.UserCollection;
         }
 
-        public async Task<User> CreateUser(User user)
+        public async Task<User?> CreateUser(User user)
         {
-            await _userCollection.InsertOneAsync(user);
-            return user;
+            try
+            {
+                await _userCollection.InsertOneAsync(user);
+                return user;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
-        public Task DeleteUser(string id)
+        public async Task<bool> DeleteUser(string id)
         {
-            return _userCollection.DeleteOneAsync(user => user.id == id);
+            var result = await _userCollection.DeleteOneAsync(user => user.id == id);
+            return result.IsAcknowledged && result.DeletedCount>0;
         }
 
-        public Task<User> GetUser(string id)
+        public async Task<User?> GetUser(string id)
         {
-            return _userCollection.Find(user => user.id == id).FirstOrDefaultAsync();
+            var result = await _userCollection.Find(user => user.id == id).FirstOrDefaultAsync();
+            return result;
         }
 
-        public Task UpdateUser(User user)
+        public async Task<User?> UpdateUser(User user)
         {
-            return _userCollection.ReplaceOneAsync(u => u.id == user.id, user);
+            var result = await _userCollection.ReplaceOneAsync(u => u.id == user.id, user);
+            return (result.IsAcknowledged && result.ModifiedCount > 0)?user:null ;
         }
     }
 }

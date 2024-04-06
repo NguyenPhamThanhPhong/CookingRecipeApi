@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CookingRecipeApi.Models;
 using CookingRecipeApi.RequestsResponses.LoginRequests;
+using CookingRecipeApi.RequestsResponses.RecipeRequests;
 using CookingRecipeApi.RequestsResponses.UserRequests;
 
 namespace CookingRecipeApi.Configs
@@ -25,6 +26,9 @@ namespace CookingRecipeApi.Configs
                 categories = src.categories,
                 hungryHeads = src.hungryHeads
             })).ReverseMap();
+            CreateMap<RecipeCreateRequest, Recipe>();
+            // mapping keepUrls => attatchmentUrls
+            CreateMap<RecipeUpdateRequest, Recipe>().ForMember(dest => dest.attachmentUrls, opt => opt.MapFrom(src => src.keepUrls));
         }
     }
 }

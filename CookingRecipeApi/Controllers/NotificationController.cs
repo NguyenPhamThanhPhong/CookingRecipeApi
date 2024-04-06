@@ -2,8 +2,10 @@
 using CookingRecipeApi.Models;
 using CookingRecipeApi.Services.BusinessServices.IServicies;
 using CookingRecipeApi.Services.RabbitMQServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CookingRecipeApi.Controllers
 {
@@ -22,18 +24,31 @@ namespace CookingRecipeApi.Controllers
             _mapper = mapper;
             _notificationTaskProducer = notificationTaskProducer;
         }
-
-        [HttpGet("${userId}/${page}")]
-        public IActionResult Get(string userId,int page)
+        [HttpGet("{page}")]
+        [Authorize]
+        public async Task<IActionResult> Get(int page)
         {
-            return Ok("NotificationController");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if(userId == null)
+            {
+                return BadRequest("User not found");
+            }
+            var notifications = await _notificationService.GetNotifications(userId, page);
+            return Ok(notifications);
         }
-        [HttpPost("Create")]
-        public IActionResult Create([FromBody] string notification)
+        [HttpPut("mark-read/{offSet}/{isRead}")]
+        [Authorize]
+        public async Task<IActionResult> MarkRead(int offSet, bool isRead)
         {
-            return Ok("NotificationController");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return BadRequest("User not found");
+            }
+            var result = await _notificationService.MarkRead(offSet, userId,isRead);
+            return Ok(result);
         }
-        [HttpPost("doom-notification/${message}")]
+        [HttpPost("make-doom-notification-test/{message}")]
         public IActionResult DoomNotification([FromBody] List<string> userIds, string message)
         {
             var notification = new Notification()

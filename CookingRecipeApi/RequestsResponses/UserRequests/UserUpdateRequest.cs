@@ -9,6 +9,7 @@ namespace CookingRecipeApi.RequestsResponses.UserRequests
         [StringLength(50, MinimumLength = 1)]
         public string fullName { get; set; }
         public string avatarUrl { get; set; }
+        public IFormFile? avatarImg { get; set; }
         public bool isVegan { get; set; }
         public string bio { get; set; }
         public List<string> categories { get; set; }

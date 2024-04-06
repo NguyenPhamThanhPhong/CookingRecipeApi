@@ -1,4 +1,5 @@
 ﻿using CookingRecipeApi.Configs;
+using CookingRecipeApi.Helper;
 using CookingRecipeApi.Repositories.Interfaces;
 using CookingRecipeApi.Repositories.Repos;
 using CookingRecipeApi.Services.AuthenticationServices;
@@ -6,8 +7,13 @@ using CookingRecipeApi.Services.AzureBlobServices;
 using CookingRecipeApi.Services.BusinessServices.IServicies;
 using CookingRecipeApi.Services.BusinessServices.Services;
 using CookingRecipeApi.Services.RabbitMQServices;
+using CookingRecipeApi.Services.SMTPServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 using System.Text.Json;
 
@@ -17,9 +23,9 @@ namespace CookingRecipeApi
     {
         public static void ConfigureServices(this IServiceCollection services, IConfiguration config)
         {
-            services.AddControllers();
+            services.ConfigControllers();
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            services.ConfigSwagger(config);
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddSignalR();
@@ -53,21 +59,50 @@ namespace CookingRecipeApi
             AuthenticationConfigs authenticationConfigs = new AuthenticationConfigs();
             config.GetSection("AuthenticationConfigs").Bind(authenticationConfigs);
             services.AddSingleton(authenticationConfigs);
-            services.AddSingleton<TokenGenerator>();
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                // help config to know the KID of the token
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = false,
+                    RequireSignedTokens = false,
+                    ValidIssuer = authenticationConfigs.Issuer,
+                    ValidAudience = authenticationConfigs.Audience,
+                    IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, validationParameters) =>
                     {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = authenticationConfigs.Issuer,
-                        ValidAudience = authenticationConfigs.Audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationConfigs.AccessTokenSecret))
-                    };
-                });
+                        // Implement your custom logic to resolve the signing key based on the key identifier (kid)
+                        // Here, you can retrieve the key based on the key identifier from a key store or configuration
+                        // For demonstration purposes, let's assume the key is retrieved from a dictionary based on the key identifier
+                        if (keyIdentifier != null)
+                        {
+                            var kid = keyIdentifier.ToUpper();
+                            return new List<SecurityKey> { new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationConfigs.AccessTokenSecret)) };
+
+                        }
+                        return null;
+                    },
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationConfigs.AccessTokenSecret))
+                };
+
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        //Console.WriteLine("OnAuthenticationFailed: " + context.Exception.Message);
+                        return Task.CompletedTask;
+                    },
+                };
+            });
+            services.AddSingleton<TokenGenerator>();
             services.AddAuthorization();
             return services;
         }
@@ -75,7 +110,6 @@ namespace CookingRecipeApi
         {
             MessageQueueConfigs rabbitMQConfigs = new MessageQueueConfigs();
             config.GetSection("RabbitMQConfigs").Bind(rabbitMQConfigs);
-            Console.WriteLine(JsonSerializer.Serialize(rabbitMQConfigs));
             services.AddSingleton(rabbitMQConfigs);
             services.AddSingleton<NotificationTaskProducer>();
             services.AddSingleton<NotificationTaskConsumer>();
@@ -88,7 +122,10 @@ namespace CookingRecipeApi
             services.AddSingleton<IUserRepository, UserRepository>();
             services.AddSingleton<INotificationBatchRepository, NotificationBatchRepository>();
             services.AddSingleton<IRecipeRepository, RecipeRepository>();
+
             services.AddSingleton<ILoginService, LoginService>();
+            services.AddSingleton<IUserService, UserService>();
+            services.AddSingleton<IRecipeService, RecipeService>();
             services.AddSingleton<INotificationService, NotificationService>();
             return services;
         }
@@ -96,7 +133,7 @@ namespace CookingRecipeApi
         {
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll",builder =>
+                options.AddPolicy("AllowAll", builder =>
                     {
                         builder.AllowAnyOrigin()
                             .AllowAnyMethod()
@@ -119,6 +156,42 @@ namespace CookingRecipeApi
             SMTPConfigs smtpConfigs = new SMTPConfigs();
             config.Bind("SMTPConfiguration", smtpConfigs);
             services.AddSingleton(smtpConfigs);
+            services.AddSingleton<EmailService>();
+            return services;
+        }
+        public static IServiceCollection ConfigSwagger(this IServiceCollection services, IConfiguration config)
+        {
+            // config so that be able to custom header
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
+
+                // Add JWT authentication in Swagger UI
+                c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                });
+
+                c.OperationFilter<SecurityRequirementsOperationFilter>();
+                
+            });
+            return services;
+        }
+        public static IServiceCollection ConfigControllers(this IServiceCollection services)
+        {
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new TimeSpanConverter());
+            });
+            // add model binder
+            services.AddMvc(options =>
+            {
+                options.ModelBinderProviders.Insert(0, new TimeSpanFormBinderProvider());
+            });
+
             return services;
         }
     }

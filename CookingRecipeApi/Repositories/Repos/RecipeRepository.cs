@@ -7,45 +7,60 @@ namespace CookingRecipeApi.Repositories.Repos
 {
     public class RecipeRepository : IRecipeRepository
     {
-        private readonly IMongoCollection<Recipe> _postCollection;
+        private readonly IMongoCollection<Recipe> _recipeCollection;
         private readonly IMongoCollection<User> _userCollection;
         public RecipeRepository(DatabaseConfigs databaseConfigs)
         {
-            _postCollection = databaseConfigs.RecipeCollection;
+            _recipeCollection = databaseConfigs.RecipeCollection;
             _userCollection = databaseConfigs.UserCollection;
         }
-        public async Task<Recipe> CreatePost(Recipe post)
+        public async Task<Recipe?> CreateRecipe(Recipe recipe)
         {
-            await _postCollection.InsertOneAsync(post);
-            var userFilter = Builders<User>.Filter.Eq(u => u.id, post.userId);
-            var userUpdate = Builders<User>.Update.Push(u => u.recipeIds, post.id);
+            try
+            {
+                await _recipeCollection.InsertOneAsync(recipe);
+            }
+            catch
+            {
+                return null;
+            }
+
+            var userFilter = Builders<User>.Filter.Eq(u => u.id, recipe.userId);
+            var userUpdate = Builders<User>.Update.Push(u => u.recipeIds, recipe.id);
             await _userCollection.UpdateOneAsync(userFilter, userUpdate);
-            return post;
+            return recipe;
         }
 
-        public async Task DeletePost(string id)
+        public async Task<bool> DeleteRecipe(string id, string userID)
         {
-            await _postCollection.FindOneAndDeleteAsync(p => p.id == id);
+            var filter = Builders<Recipe>.Filter.Where(s => s.id == id && s.userId == userID);
+            var result = await _recipeCollection.FindOneAndDeleteAsync(filter);
+            if (result == null)
+                return false;
             var userFilter = Builders<User>.Filter.Eq(u => u.id, id);
             var userUpdate = Builders<User>.Update.Pull(u => u.recipeIds, id);
             await _userCollection.UpdateOneAsync(userFilter, userUpdate);
+            return true;
         }
 
-        public async Task<Recipe?> GetbyPostId(string postId)
+        public async Task<Recipe?> GetbyRecipeId(string recipeId)
         {
-            var post = await _postCollection.Find(p => p.id == postId).FirstOrDefaultAsync();
-            return post;
+            var recipe = await _recipeCollection.Find(p => p.id == recipeId).FirstOrDefaultAsync();
+            return recipe;
         }
 
-        public Task<IEnumerable<Recipe>> GetbyPostIds(List<string> postIds)
+        public Task<IEnumerable<Recipe>> GetbyRecipeIds(IEnumerable<string> recipeIds)
         {
-            var posts = _postCollection.Find(p => postIds.Contains(p.id)).ToList();
-            return Task.FromResult(posts.AsEnumerable());
+            var filter = Builders<Recipe>.Filter.In(p => p.id, recipeIds);
+            var recipes = _recipeCollection.Find(filter).ToList();
+            return Task.FromResult(recipes.AsEnumerable());
         }
 
-        public async Task UpdatePost(Recipe post)
+        public async Task<bool> UpdateRecipe(Recipe recipe, string userID)
         {
-           await _postCollection.ReplaceOneAsync(p => p.id == post.id, post);
+            var filter = Builders<Recipe>.Filter.Where(s => s.id == recipe.id && s.userId == userID);
+            var result = await _recipeCollection.ReplaceOneAsync(filter, recipe);
+            return result.IsAcknowledged && result.ModifiedCount > 0;
         }
     }
 }
