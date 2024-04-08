@@ -79,7 +79,7 @@ namespace CookingRecipeApi.Controllers
             await _recipeService.NotifyRecipe(userID, name, recipe, RecipeNotificationType.Update);
             return Ok(recipe);
         }
-        [HttpGet]
+        [HttpGet("get-from-follows-rank")]
         public async Task<IActionResult> GetFeedRecipeFromLike()
         {
             var recipes = await _recipeService.GetRecipesFromLikes();

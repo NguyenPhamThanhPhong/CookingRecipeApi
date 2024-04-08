@@ -105,7 +105,9 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var filter = Builders<User>.Filter.Where(s => s.id == userId);
             var update = Builders<User>.Update.Set(s => s.profileInfo, profile);
             var user = await _userCollection.FindOneAndUpdateAsync(filter, update);
-            await _azureBlobHandler.DeleteBlob(user.profileInfo.avatarUrl);
+            //remove old avatar since new avatar is set
+            if (request.avatarImg!= null)
+                await _azureBlobHandler.DeleteBlob(user.profileInfo.avatarUrl);
             return user != null;
         }
     }

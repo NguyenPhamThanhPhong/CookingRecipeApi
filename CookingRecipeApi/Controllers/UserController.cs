@@ -22,7 +22,7 @@ namespace CookingRecipeApi.Controllers
             _azureBlobHandler = azureBlobHandler;
             _userService = userService;
         }
-        [HttpGet]
+        [HttpGet("get-from-rank")]
         public async Task<IActionResult> GetUsersfromRank()
         {
             var users = await _userService.GetUserFromFollowRank();

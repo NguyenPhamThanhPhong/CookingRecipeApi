@@ -80,11 +80,23 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             {
                 var result = await _notificationBatchRepository.PushNotification(notification, userId);
                 await _hubContext.Clients.User(userId).SendAsync("ReceiveNotification", result);
+                await this.NotifytoUserDevices(userId, notification);
             }
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+        private Task NotifytoUserDevices(string userId, Notification notification)
+        {
+            var connections = NotificationHub.GetConnectionsFromUserId(userId);
+            if (connections == null)
+                return Task.CompletedTask;
+            foreach (var connectionId in connections)
+            {
+                _hubContext.Clients.Client(connectionId).SendAsync("ReceiveNotification", JsonSerializer.Serialize(notification));
+            }
+            return Task.CompletedTask;
         }
 
 
