@@ -79,7 +79,7 @@ namespace CookingRecipeApi.Controllers
         }
         [HttpPost("forgot-password")]
         // lấy userId ra từ token, gửi mail cái mật khẩu
-        public async Task<IActionResult> ForgotPassword()
+        public async Task<IActionResult> ForgotPassword(string email)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;

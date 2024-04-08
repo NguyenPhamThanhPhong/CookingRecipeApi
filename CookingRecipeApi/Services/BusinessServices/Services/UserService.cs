@@ -57,7 +57,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
 
         public async Task<IEnumerable<User>> GetUserFromFollowRank()
         {
-            var sort = Builders<User>.Sort.Descending(s => s.followerIds.Count);
+            var sort = Builders<User>.Sort.Descending(s => s.followerIds);
             var users = await _userCollection.Find(s => true).Sort(sort).Limit(10).ToListAsync();
             return users;
         }

@@ -4,6 +4,7 @@ using CookingRecipeApi.Models;
 using CookingRecipeApi.Repositories.Interfaces;
 using CookingRecipeApi.Services.BusinessServices.IServicies;
 using Microsoft.AspNetCore.SignalR;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Text.Json;
 
@@ -32,11 +33,14 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         {
             int page = offSet / _batchSize;
             int item_offset = offSet % _batchSize;
+            Console.WriteLine($"{page} + {item_offset} ");
             var filter = Builders<NotificationBatch>.Filter.Where(
                 x => x.userId == userId 
                 && x.page==page
                 && x.notifications[item_offset]!=null );
+            Console.WriteLine(filter.ToJson());
             var update = Builders<NotificationBatch>.Update.Set(x => x.notifications[item_offset], null);
+            Console.WriteLine(update.ToJson());
             return _notificationBatchCollection.UpdateOneAsync(filter, update)
                 .ContinueWith(x => x.Result.ModifiedCount > 0);
         }
@@ -64,6 +68,8 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
                     && x.page == page 
                     && x.notifications[offSet % _batchSize] != null);
                 var update = Builders<NotificationBatch>.Update.Set(x => x.notifications[offSet % _batchSize].isRead, isRead);
+                Console.WriteLine(filter.ToJson());
+                Console.WriteLine(update.ToJson());
                 return _notificationBatchCollection.UpdateOneAsync(filter, update)
                     .ContinueWith(x=>x.Result.ModifiedCount>0);
             }

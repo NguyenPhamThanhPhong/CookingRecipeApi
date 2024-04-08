@@ -46,9 +46,10 @@ namespace CookingRecipeApi.Controllers
                 return BadRequest("User not found");
             }
             var result = await _notificationService.MarkRead(offSet, userId,isRead);
-            return result?Ok():BadRequest();
+            return result?Ok():BadRequest("not found user");
         }
         [HttpDelete("/{offSet}")]
+        [Authorize]
         public async Task<IActionResult> DeleteNotification(int offSet)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -57,7 +58,7 @@ namespace CookingRecipeApi.Controllers
                 return BadRequest("User not found");
             }
             var result = await _notificationService.DeleteNotification(offSet, userId);
-            return result ? Ok() : BadRequest();
+            return result ? Ok() : BadRequest("not found user");
         }
         [HttpPost("make-doom-notification-test/{message}")]
         public IActionResult DoomNotification([FromBody] List<string> userIds, string message)
