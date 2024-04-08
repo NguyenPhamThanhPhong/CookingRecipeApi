@@ -22,7 +22,7 @@ namespace CookingRecipeApi.RequestsResponses.RecipeRequests
         public Dictionary<string, string> ingredients { get; set; }
         public bool isPublished { get; set; }
         // must provide to do replace async
-        public DateTime updatedTime { get; set; }
+        public DateTime createdAt { get; set; }
 
     }
 }

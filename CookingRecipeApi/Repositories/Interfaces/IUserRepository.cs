@@ -7,6 +7,6 @@ namespace CookingRecipeApi.Repositories.Interfaces
         Task<User?> GetUser(string id);
         Task<User?> CreateUser(User user);
         Task<User?> UpdateUser(User user);
-        Task<bool> DeleteUser(string id);
+        Task<User?> DeleteUser(string id);
     }
 }

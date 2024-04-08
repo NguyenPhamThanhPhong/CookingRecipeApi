@@ -42,10 +42,31 @@ namespace CookingRecipeApi.Services.AzureBlobServices
             }
             return blobClient.Uri.AbsoluteUri;
         }
-        public async Task<bool> DeleteBlob(string blobName)
+        public async Task<bool> DeleteBlob(string blobUrl)
         {
+            var blobName = blobUrl.Split('/').Last();
             var blobClient = _blobContainerClient.GetBlobClient(blobName);
             return await blobClient.DeleteIfExistsAsync();
+        }
+        public async Task<bool> DeleteMultipleBlobs(IEnumerable<string> blobUrls)
+        {
+            try
+            {
+                Task[] tasks = new Task[blobUrls.Count()];
+                for (int i = 0; i < blobUrls.Count(); i++)
+                {
+                    var blobName = blobUrls.ElementAt(i).Split('/').Last();
+                    var blobClient = _blobContainerClient.GetBlobClient(blobName);
+                    tasks[i] = blobClient.DeleteIfExistsAsync();
+                }
+                await Task.WhenAll(tasks);
+                return true;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Error deleting blobs: " + ex.Message);
+                return false;
+            }
         }
     }
 }

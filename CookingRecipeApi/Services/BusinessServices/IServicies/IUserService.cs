@@ -11,5 +11,6 @@ namespace CookingRecipeApi.Services.BusinessServices.IServicies
         public Task<bool> DeleteUser(string id);
         public Task<bool> UpdatePassword(string id, string password);
         public Task<bool> UpdateFollow(string id, string followId,bool option);
+        public Task<IEnumerable<User>> GetUserFromFollowRank();
     }
 }

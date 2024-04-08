@@ -5,6 +5,7 @@ using CookingRecipeApi.Services.BusinessServices.IServicies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 using System.Security.Claims;
 
 namespace CookingRecipeApi.Controllers
@@ -20,6 +21,12 @@ namespace CookingRecipeApi.Controllers
         {
             _azureBlobHandler = azureBlobHandler;
             _userService = userService;
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetUsersfromRank()
+        {
+            var users = await _userService.GetUserFromFollowRank();
+            return Ok(users);
         }
         [Authorize]
         [HttpPut("update-profile")]
@@ -38,7 +45,7 @@ namespace CookingRecipeApi.Controllers
             return Ok(profile);
         }
         [Authorize]
-        [HttpDelete("delete")]
+        [HttpDelete("")]
         public async Task<IActionResult> DeleteUser()
         {
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

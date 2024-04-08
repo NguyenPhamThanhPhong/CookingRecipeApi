@@ -31,16 +31,16 @@ namespace CookingRecipeApi.Repositories.Repos
             return recipe;
         }
 
-        public async Task<bool> DeleteRecipe(string id, string userID)
+        public async Task<Recipe?> DeleteRecipe(string id, string userID)
         {
             var filter = Builders<Recipe>.Filter.Where(s => s.id == id && s.userId == userID);
             var result = await _recipeCollection.FindOneAndDeleteAsync(filter);
             if (result == null)
-                return false;
+                return result;
             var userFilter = Builders<User>.Filter.Eq(u => u.id, id);
             var userUpdate = Builders<User>.Update.Pull(u => u.recipeIds, id);
             await _userCollection.UpdateOneAsync(userFilter, userUpdate);
-            return true;
+            return result;
         }
 
         public async Task<Recipe?> GetbyRecipeId(string recipeId)
@@ -56,11 +56,11 @@ namespace CookingRecipeApi.Repositories.Repos
             return Task.FromResult(recipes.AsEnumerable());
         }
 
-        public async Task<bool> UpdateRecipe(Recipe recipe, string userID)
+        public async Task<Recipe?> UpdateRecipe(Recipe recipe, string userID)
         {
             var filter = Builders<Recipe>.Filter.Where(s => s.id == recipe.id && s.userId == userID);
-            var result = await _recipeCollection.ReplaceOneAsync(filter, recipe);
-            return result.IsAcknowledged && result.ModifiedCount > 0;
+            var result = await _recipeCollection.FindOneAndReplaceAsync(filter, recipe);
+            return result;
         }
     }
 }

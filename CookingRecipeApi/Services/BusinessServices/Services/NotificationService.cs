@@ -27,11 +27,25 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             _hubContext = hubContext;
             _batchSize = databaseConfigs.NotificationBatchSize;
         }
-        public async Task<IEnumerable<string>> DetectUserIdtoNotification(string userId)
+
+        public Task<bool> DeleteNotification(int offSet, string userId)
+        {
+            int page = offSet / _batchSize;
+            int item_offset = offSet % _batchSize;
+            var filter = Builders<NotificationBatch>.Filter.Where(
+                x => x.userId == userId 
+                && x.page==page
+                && x.notifications[item_offset]!=null );
+            var update = Builders<NotificationBatch>.Update.Set(x => x.notifications[item_offset], null);
+            return _notificationBatchCollection.UpdateOneAsync(filter, update)
+                .ContinueWith(x => x.Result.ModifiedCount > 0);
+        }
+
+        public async Task<Tuple<string, List<string>>?> DetectUserIdtoNotification(string userId)
         {
             var filter = Builders<User>.Filter.Eq(x => x.id, userId);
-            var projection = Builders<User>.Projection.Expression(x => x.followerIds);
-            var followers = await _userCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
+            var projection = Builders<User>.Projection.Expression(x => Tuple.Create(x.profileInfo.avatarUrl,x.followerIds));
+            Tuple<string,List<string>>? followers = await _userCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
             return followers;
         }
 
@@ -40,7 +54,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             return _notificationBatchRepository.GetNotifications(userId, page);
         }
 
-        public async Task<bool> MarkRead(int offSet, string userId,bool isRead)
+        public  Task<bool> MarkRead(int offSet, string userId,bool isRead)
         {
             try
             {
@@ -49,15 +63,14 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
                     x => x.userId == userId
                     && x.page == page 
                     && x.notifications[offSet % _batchSize] != null);
-                // only update when notification is not null in the list<Nofitication?>
                 var update = Builders<NotificationBatch>.Update.Set(x => x.notifications[offSet % _batchSize].isRead, isRead);
-                var updateResult = await _notificationBatchCollection.UpdateOneAsync(filter, update);
-                return updateResult.ModifiedCount > 0;
+                return _notificationBatchCollection.UpdateOneAsync(filter, update)
+                    .ContinueWith(x=>x.Result.ModifiedCount>0);
             }
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return false;
+                return Task.FromResult(false);
             };
         }
 

@@ -13,5 +13,6 @@ namespace CookingRecipeApi.Services.BusinessServices.IServicies
         Task<Recipe?> UpdateRecipe(RecipeUpdateRequest request, string userId);
         Task<bool> DeleteRecipe(string id, string userId);
         Task NotifyRecipe(string userId, string userfullName, Recipe recipe, RecipeNotificationType type);
+        Task<IEnumerable<Recipe>> GetRecipesFromLikes();
     }
 }

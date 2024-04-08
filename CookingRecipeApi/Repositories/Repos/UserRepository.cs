@@ -27,10 +27,10 @@ namespace CookingRecipeApi.Repositories.Repos
             }
         }
 
-        public async Task<bool> DeleteUser(string id)
+        public async Task<User?> DeleteUser(string id)
         {
-            var result = await _userCollection.DeleteOneAsync(user => user.id == id);
-            return result.IsAcknowledged && result.DeletedCount>0;
+            var deletedUser = await _userCollection.FindOneAndDeleteAsync(user => user.id == id);
+            return deletedUser;
         }
 
         public async Task<User?> GetUser(string id)

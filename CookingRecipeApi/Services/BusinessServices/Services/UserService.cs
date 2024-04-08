@@ -31,7 +31,10 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         public async Task<bool> DeleteUser(string id)
         {
             var result = await _userRepository.DeleteUser(id);
-            return result;
+            if(result==null)
+                return false;
+            await _azureBlobHandler.DeleteBlob(result.profileInfo.avatarUrl);
+            return true;
         }
 
         public async Task<ProfileInformation> getProfilebyId(string id)
@@ -50,6 +53,13 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var projection = _profileProjection;
             var profiles = await _userCollection.Find(filter).Skip(skip).Limit(20).Project(projection).ToListAsync();
             return profiles;
+        }
+
+        public async Task<IEnumerable<User>> GetUserFromFollowRank()
+        {
+            var sort = Builders<User>.Sort.Descending(s => s.followerIds.Count);
+            var users = await _userCollection.Find(s => true).Sort(sort).Limit(10).ToListAsync();
+            return users;
         }
 
         public async Task<bool> UpdateFollow(string id, string followId,bool option)
@@ -94,8 +104,9 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             }
             var filter = Builders<User>.Filter.Where(s => s.id == userId);
             var update = Builders<User>.Update.Set(s => s.profileInfo, profile);
-            var result = await _userCollection.UpdateOneAsync(filter, update);
-            return result.IsAcknowledged && result.ModifiedCount > 0;
+            var user = await _userCollection.FindOneAndUpdateAsync(filter, update);
+            await _azureBlobHandler.DeleteBlob(user.profileInfo.avatarUrl);
+            return user != null;
         }
     }
 }

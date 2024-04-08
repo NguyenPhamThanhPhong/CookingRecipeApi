@@ -21,7 +21,7 @@ namespace CookingRecipeApi.Services.RabbitMQServices
         private readonly SemaphoreSlim _notificationSemaphoreSlim;
         private readonly SemaphoreSlim _followerIdSemaphoreSlim;
         private readonly Func<Notification,string, Task> _sendNotification; // borrow this from service
-        private readonly Func<string,Task<IEnumerable<string>>> _proccessFollowerId; // borrow this from service
+        private readonly Func<string,Task<Tuple<string, List<string>>?>> _proccessFollowerId; // borrow this from service
         private readonly NotificationTaskProducer _notificationProducer;
         public NotificationTaskConsumer(MessageQueueConfigs messageQueueConfigs,
             NotificationTaskProducer notificationProducer,INotificationService notificationService)
@@ -52,11 +52,16 @@ namespace CookingRecipeApi.Services.RabbitMQServices
                     if (notificationMessage == null)
                         return;
 
-                    IEnumerable<string> followerIds = await _proccessFollowerId(notificationMessage.UserId);
+                    Tuple<string,List<string>>? metaData = await _proccessFollowerId(notificationMessage.UserId);
+                    if (metaData == null)
+                        return;
+                    var followerIds = metaData.Item2;
+                    var avatarUrl = metaData.Item1;
                     Task[] tasks = new Task[followerIds.Count()];
                     var generalNotification = new Notification
                     {
                         isRead = false,
+                        imageUrl = avatarUrl,
                         redirectPath = notificationMessage.Path,
                         title = notificationMessage.Title,
                         content = notificationMessage.Message,
