@@ -36,11 +36,10 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             Console.WriteLine($"{page} + {item_offset} ");
             var filter = Builders<NotificationBatch>.Filter.Where(
                 x => x.userId == userId 
-                && x.page==page
-                && x.notifications[item_offset]!=null );
-            Console.WriteLine(filter.ToJson());
+                && x.page==page )
+                & Builders<NotificationBatch>.Filter.Exists(
+                                       x => x.notifications[item_offset]);
             var update = Builders<NotificationBatch>.Update.Set(x => x.notifications[item_offset], null);
-            Console.WriteLine(update.ToJson());
             return _notificationBatchCollection.UpdateOneAsync(filter, update)
                 .ContinueWith(x => x.Result.ModifiedCount > 0);
         }
@@ -58,20 +57,22 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             return _notificationBatchRepository.GetNotifications(userId, page);
         }
 
-        public  Task<bool> MarkRead(int offSet, string userId,bool isRead)
+        public Task<bool> MarkRead(int offSet, string userId,bool isRead)
         {
             try
             {
                 int page = offSet / _batchSize;
+                int item_offset = offSet % _batchSize;
                 var filter = Builders<NotificationBatch>.Filter.Where(
                     x => x.userId == userId
-                    && x.page == page 
-                    && x.notifications[offSet % _batchSize] != null);
-                var update = Builders<NotificationBatch>.Update.Set(x => x.notifications[offSet % _batchSize].isRead, isRead);
-                Console.WriteLine(filter.ToJson());
-                Console.WriteLine(update.ToJson());
+                    && x.page == page)
+                    & Builders<NotificationBatch>.Filter.Exists(
+                        x => x.notifications[item_offset]);
+                var temp = _notificationBatchCollection.Find(filter).FirstOrDefault();
+                var update = Builders<NotificationBatch>.Update.Set(
+                    x => x.notifications[item_offset].isRead, isRead);
                 return _notificationBatchCollection.UpdateOneAsync(filter, update)
-                    .ContinueWith(x=>x.Result.ModifiedCount>0);
+                    .ContinueWith(x=> x.Result.ModifiedCount > 0);
             }
             catch(Exception ex)
             {
@@ -85,7 +86,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             try
             {
                 var result = await _notificationBatchRepository.PushNotification(notification, userId);
-                await _hubContext.Clients.User(userId).SendAsync("ReceiveNotification", result);
+                await _hubContext.Clients.All.SendAsync("ReceiveNotification", notification);
                 await this.NotifytoUserDevices(userId, notification);
             }
             catch(Exception ex)

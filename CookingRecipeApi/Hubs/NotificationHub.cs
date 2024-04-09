@@ -11,6 +11,7 @@ namespace CookingRecipeApi.Hubs
         [Authorize]
         public override Task OnConnectedAsync()
         {
+            Console.WriteLine("connected");
             var userId = Context.UserIdentifier;
             string connectionId = Context.ConnectionId;
             if(userId == null)

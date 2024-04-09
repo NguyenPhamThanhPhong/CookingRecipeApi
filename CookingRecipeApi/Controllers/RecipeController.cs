@@ -28,12 +28,7 @@ namespace CookingRecipeApi.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetRecipeById(string id)
         {
-            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userID == null)
-                return Unauthorized();
-
             var recipe = await _recipeService.GetRecipeById(id);
-
             if (recipe == null)
                 return NotFound("recipe not found in database");
             return Ok(recipe);

@@ -46,6 +46,7 @@ namespace CookingRecipeApi.Controllers
                 return BadRequest("User not found");
             }
             var result = await _notificationService.MarkRead(offSet, userId,isRead);
+            Console.WriteLine(result);
             return result?Ok():BadRequest("not found user");
         }
         [HttpDelete("/{offSet}")]

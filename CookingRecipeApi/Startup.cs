@@ -133,12 +133,13 @@ namespace CookingRecipeApi
         {
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll", builder =>
-                    {
-                        builder.AllowAnyOrigin()
-                            .AllowAnyMethod()
-                            .AllowAnyHeader();
-                    });
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .SetIsOriginAllowed(host => true) // allow any origin
+                            .AllowCredentials();
+                });
             });
             return services;
         }
