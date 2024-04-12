@@ -56,7 +56,6 @@ namespace CookingRecipeApi.Repositories.Repos
 
         public async Task<Notification> PushNotification(Notification notification, string userId)
         {
-            Console.WriteLine("triggered");
             var filter = Builders<NotificationBatch>.Filter.And(
                 Builders<NotificationBatch>.Filter.Eq(n => n.userId, userId));
             var sort = Builders<NotificationBatch>.Sort.Descending(n => n.page);
@@ -71,6 +70,7 @@ namespace CookingRecipeApi.Repositories.Repos
                     notificationBatch = new NotificationBatch
                     {
                         userId = userId,
+                        count = 1,
                         page = 0,
                         notifications = new List<Notification?> { notification }
                     };
@@ -80,14 +80,15 @@ namespace CookingRecipeApi.Repositories.Repos
                 if(notificationBatch.notifications.Count < _notificationBatchSize)
                 {
                     notification.offSet = notificationBatch.notifications.Count;
-                    var update = Builders<NotificationBatch>.Update.Push(n => n.notifications, notification);
+                    var update = Builders<NotificationBatch>.Update.Combine(
+                        Builders<NotificationBatch>.Update.Push(n => n.notifications, notification),
+                        Builders<NotificationBatch>.Update.Inc(n => n.count, 1));
                     updateResult = await _notificationBatchCollection.UpdateOneAsync(filter, update);
                     return notification;
                 }
                 else
                 {
                     var lastPage = notificationBatch.page;
-
                     //đoạn này
                     var newPage = lastPage + 1;
                     // if the last page is full, then we need to create a new page
@@ -98,13 +99,12 @@ namespace CookingRecipeApi.Repositories.Repos
                     {
                         userId = userId,
                         page = newPage,
+                        count = 1,
                         notifications = new List<Notification?> { notification }
                     };
                     await _notificationBatchCollection.InsertOneAsync(newNotificationBatch);
                     return notification;
                     //đoạn này
-
-
                     //var lastNotification = notificationBatch.notifications.Last();
                     //// why you check lastNotification is null?
                     //// if lastNotification is null, then the last page is not full
@@ -118,7 +118,6 @@ namespace CookingRecipeApi.Repositories.Repos
                     //}
                     //else
                     //{
-                        
                     //}   
                 }
             }

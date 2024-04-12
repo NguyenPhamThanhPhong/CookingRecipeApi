@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
-
+using System.Text;
+using System.Text.Json;
 namespace CookingRecipeApi.Models
 {
     public class Recipe
@@ -12,7 +13,9 @@ namespace CookingRecipeApi.Models
         public string instruction { get; set; }
         public DateTime createdAt { get; set; }
         public DateTime updatedAt { get; set; }
+        public uint representIndex { get; set; }
         public List<string> attachmentUrls { get; set; }
+        public List<string> Categories { get; set; }
         public int likes { get; set; }
         public List<string> commentBatchIds { get; set; }
         public TimeSpan cookTime { get; set; }
