@@ -20,9 +20,5 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             _commentBatchCollection = databaseConfigs.CommentBatchCollection;
             _mapper = mapper;
         }
-        public Task<bool> CreateComment(CommentCreateRequest request)
-        {
-
-        }
     }
 }

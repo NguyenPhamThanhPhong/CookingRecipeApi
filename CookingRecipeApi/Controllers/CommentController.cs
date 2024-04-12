@@ -7,6 +7,5 @@ namespace CookingRecipeApi.Controllers
     [ApiController]
     public class CommentController : ControllerBase
     {
-        private readonly
     }
 }

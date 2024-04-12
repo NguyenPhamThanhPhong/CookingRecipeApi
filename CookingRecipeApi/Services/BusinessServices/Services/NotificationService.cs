@@ -85,7 +85,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         {
             try
             {
-                var result = await _notificationBatchRepository.PushNotification(notification, userId);
+                var result = await _notificationBatchRepository.PushNotification(userId, notification );
                 await _hubContext.Clients.All.SendAsync("ReceiveNotification", notification);
                 await this.NotifytoUserDevices(userId, notification);
             }
