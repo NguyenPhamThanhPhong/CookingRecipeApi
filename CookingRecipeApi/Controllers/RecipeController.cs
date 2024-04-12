@@ -74,6 +74,16 @@ namespace CookingRecipeApi.Controllers
             await _recipeService.NotifyRecipe(userID, name, recipe, RecipeNotificationType.Update);
             return Ok(recipe);
         }
+        [Authorize]
+        [HttpPost("save-recipe/{recipeId}")]
+        public async Task<IActionResult> SaveRecipe(string recipeId)
+        {
+            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userID == null)
+                return Unauthorized();
+            var result = await _recipeService.SaveRecipe(recipeId, userID);
+            return result ? Ok() : BadRequest();
+        }
         [HttpGet("get-from-likes")]
         public async Task<IActionResult> GetFeedRecipeFromLike()
         {

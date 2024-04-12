@@ -15,6 +15,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
     {
         private readonly IRecipeRepository _recipeRepository;
         private readonly IMongoCollection<Recipe> _recipeCollection;
+        private readonly IMongoCollection<User> _userCollection;
         private readonly ClientConstants _clientConstants;
         private readonly AzureBlobHandler _azureBlobHandler;
         private readonly NotificationTaskProducer _notificationTaskProducer;
@@ -26,6 +27,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         {
             _recipeRepository = recipeRepository;
             _recipeCollection = databaseConfigs.RecipeCollection;
+            _userCollection = databaseConfigs.UserCollection;
             _azureBlobHandler = azureBlobHandler;
             _mapper = mapper;
             _clientConstants = clientConstants;
@@ -47,13 +49,13 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var result = await _recipeRepository.CreateRecipe(recipe);
             return result;
         }
-        public async Task<Recipe?> GetRecipeById(string id)
+        public Task<Recipe?> GetRecipeById(string id)
         {
-            return await _recipeRepository.GetbyRecipeId(id);
+            return _recipeRepository.GetbyRecipeId(id);
         }
-        public async Task<IEnumerable<Recipe>> GetRecipes(IEnumerable<string> ids)
+        public Task<IEnumerable<Recipe>> GetRecipes(IEnumerable<string> ids)
         {
-            return await _recipeRepository.GetbyRecipeIds(ids);
+            return _recipeRepository.GetbyRecipeIds(ids);
         }
         public async Task<Recipe?> UpdateRecipe(RecipeUpdateRequest request, string userID)
         {
@@ -111,6 +113,12 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var sort = Builders<Recipe>.Sort.Descending(s => s.likes);
             var recipes = await _recipeCollection.Find(s => true).Sort(sort).Limit(10).ToListAsync();
             return recipes;
+        }
+        public  Task<bool> SaveRecipe(string userId,string recipeId)
+        {
+            var update = Builders<User>.Update.Push(s => s.savedRecipeIds, recipeId);
+            return _userCollection.UpdateOneAsync(s => s.id == userId, update)
+                .ContinueWith(s => s.Result.ModifiedCount > 0);
         }
     }
     public enum RecipeNotificationType

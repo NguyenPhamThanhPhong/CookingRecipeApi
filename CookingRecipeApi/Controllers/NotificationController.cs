@@ -14,15 +14,13 @@ namespace CookingRecipeApi.Controllers
     public class NotificationController : ControllerBase
     {
         private readonly INotificationService _notificationService;
-        private readonly NotificationTaskProducer _notificationTaskProducer;
         private readonly IMapper _mapper;
 
         public NotificationController(INotificationService notificationService, 
-            IMapper mapper, NotificationTaskProducer notificationTaskProducer)
+            IMapper mapper)
         {
             _notificationService = notificationService;
             _mapper = mapper;
-            _notificationTaskProducer = notificationTaskProducer;
         }
         [HttpGet("{page}")]
         [Authorize]
@@ -61,23 +59,23 @@ namespace CookingRecipeApi.Controllers
             var result = await _notificationService.DeleteNotification(offSet, userId);
             return result ? Ok() : BadRequest("not found user");
         }
-        [HttpPost("make-doom-notification-test/{message}")]
-        public IActionResult DoomNotification([FromBody] List<string> userIds, string message)
-        {
-            var notification = new Notification()
-            {
-                content = message,
-                createdAt = DateTime.UtcNow,
-                isRead = false,
-                offSet = 0,
-                redirectPath = "/hello",
-                title = "Doom Notification"
-            };
-            foreach (var userId in userIds)
-            {
-                _notificationTaskProducer.EnqueueNotification(notification,userId);
-            }
-            return Ok("NotificationController");
-        }
+        //[HttpPost("make-doom-notification-test/{message}")]
+        //public IActionResult DoomNotification([FromBody] List<string> userIds, string message)
+        //{
+        //    var notification = new Notification()
+        //    {
+        //        content = message,
+        //        createdAt = DateTime.UtcNow,
+        //        isRead = false,
+        //        offSet = 0,
+        //        redirectPath = "/hello",
+        //        title = "Doom Notification"
+        //    };
+        //    foreach (var userId in userIds)
+        //    {
+        //        _notificationTaskProducer.EnqueueNotification(notification,userId);
+        //    }
+        //    return Ok("NotificationController");
+        //}
     }
 }

@@ -17,7 +17,7 @@ namespace CookingRecipeApi.RequestsResponses.RecipeRequests
         //count <= 3 and each file size <= 5MB
         public List<IFormFile>? files { get; set; }
         [Required]
-        public uint representIndex { get; set; } = 0;
+        public int representIndex { get; set; } = -1;
         [TimeSpanModelStateValidation]
         [SwaggerSchema(Format = "uint32",Description ="60")]
         public TimeSpan cookTime { get; set; }

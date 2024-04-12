@@ -3,6 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace CookingRecipeApi.Models
 {
+    [BsonIgnoreExtraElements]
     public class User
     {
         public User()
@@ -71,12 +72,14 @@ namespace CookingRecipeApi.Models
     }
     public class LoginTicket
     {
+        public string deviceId { get; set; }
         public string refreshToken { get; set; }
         public string deviceInfo { get; set; }
         public DateTime createTime { get; set; }
         public DateTime expireTime { get; set; }
-        public LoginTicket(string refreshToken, string deviceInfo)
+        public LoginTicket(string refreshToken, string deviceInfo,string deviceId)
         {
+            this.deviceId = deviceId;
             this.refreshToken = refreshToken;
             this.deviceInfo = deviceInfo;
             createTime = DateTime.UtcNow;

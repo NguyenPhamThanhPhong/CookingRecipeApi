@@ -23,6 +23,13 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             _tokenGenerator = tokenGenerator;
             _mapper = mapper;
         }
+        private Task<string> StoreRefreshToken(User user,string deviceId,string deviceInfo)
+        {
+            var refreshToken = _tokenGenerator.GenerateRefreshToken();
+            var loginTicket = new LoginTicket(refreshToken,deviceId,deviceInfo);
+            var update = Builders<User>.Update.Push(s => s.loginTickets, loginTicket);
+            return _userCollection.UpdateOneAsync(s => s.id == user.id, update).ContinueWith(s => refreshToken);
+        }
         public async Task<Tuple<string,string,User>?> LoginwithGmail(string email,string password)
         {
             var user = await _userCollection.Find(s=>s.authenticationInfo.email == email).FirstOrDefaultAsync();

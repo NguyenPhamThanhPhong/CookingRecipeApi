@@ -23,11 +23,14 @@ namespace CookingRecipeApi.Configs
         public string UsersCollectionName { get; set; }
         public string RecipeCollectionName { get; set; }
         public string NotificationBatchCollectionName { get; set; }
+        public string CommentBatchCollectionName { get; set; }
         public int NotificationBatchSize { get; set; }
+        public int CommentBatchSize { get; set; }
 
         public IMongoCollection<User> UserCollection { get; set; }
         public IMongoCollection<Recipe> RecipeCollection { get; set; }
         public IMongoCollection<NotificationBatch> NotificationBatchCollection { get; set; }
+        public IMongoCollection<CommentBatch> CommentBatchCollection { get; set; }
 
         public void Initialize()
         {
@@ -37,6 +40,7 @@ namespace CookingRecipeApi.Configs
             UserCollection = database.GetCollection<User>(UsersCollectionName);
             RecipeCollection = database.GetCollection<Recipe>(RecipeCollectionName);
             NotificationBatchCollection = database.GetCollection<NotificationBatch>(NotificationBatchCollectionName);
+            CommentBatchCollection = database.GetCollection<CommentBatch>(CommentBatchCollectionName);
         }
 
 

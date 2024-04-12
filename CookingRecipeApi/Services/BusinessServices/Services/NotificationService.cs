@@ -33,12 +33,12 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         {
             int page = offSet / _batchSize;
             int item_offset = offSet % _batchSize;
-            Console.WriteLine($"{page} + {item_offset} ");
+            //Console.WriteLine($"{page} + {item_offset} ");
             var filter = Builders<NotificationBatch>.Filter.Where(
-                x => x.userId == userId 
-                && x.page==page )
+                x => x.userId == userId
+                && x.page == page)
                 & Builders<NotificationBatch>.Filter.Exists(
-                                       x => x.notifications[item_offset]);
+                    x => x.notifications[item_offset]);
             var update = Builders<NotificationBatch>.Update.Set(x => x.notifications[item_offset], null);
             return _notificationBatchCollection.UpdateOneAsync(filter, update)
                 .ContinueWith(x => x.Result.ModifiedCount > 0);
@@ -68,7 +68,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
                     && x.page == page)
                     & Builders<NotificationBatch>.Filter.Exists(
                         x => x.notifications[item_offset]);
-                var temp = _notificationBatchCollection.Find(filter).FirstOrDefault();
+                //var temp = _notificationBatchCollection.Find(filter).FirstOrDefault();
                 var update = Builders<NotificationBatch>.Update.Set(
                     x => x.notifications[item_offset].isRead, isRead);
                 return _notificationBatchCollection.UpdateOneAsync(filter, update)

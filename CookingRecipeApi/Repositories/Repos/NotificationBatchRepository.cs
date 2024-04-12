@@ -8,22 +8,22 @@ namespace CookingRecipeApi.Repositories.Repos
     public class NotificationBatchRepository : INotificationBatchRepository
     {
         private readonly IMongoCollection<NotificationBatch> _notificationBatchCollection;
-        private readonly IMongoCollection<User> _userCollection;
         private readonly int _notificationBatchSize;
         private readonly ClientConstants _clientConstants;
-        public NotificationBatchRepository(DatabaseConfigs databaseConfigs, ClientConstants clientConstants)
+        public NotificationBatchRepository(DatabaseConfigs databaseConfigs, 
+            ClientConstants clientConstants)
         {
             _notificationBatchCollection = databaseConfigs.NotificationBatchCollection;
-            _userCollection = databaseConfigs.UserCollection;
             _notificationBatchSize = databaseConfigs.NotificationBatchSize;
             _clientConstants = clientConstants;
         }
 
-        public async Task DeleteNotification(int notificationOffset)
+        public async Task DeleteNotification(string userId, int notificationOffset)
         {
             var page = notificationOffset / _notificationBatchSize;
             var offset = notificationOffset % _notificationBatchSize;
-            var filter = Builders<NotificationBatch>.Filter.Eq(n => n.page, page);
+            var filter = Builders<NotificationBatch>.Filter
+                .Where(s => s.userId == userId && s.page == page);
             var update = Builders<NotificationBatch>.Update.Set(n => n.notifications[offset], null);
             await _notificationBatchCollection.UpdateOneAsync(filter, update);
         }
@@ -54,10 +54,9 @@ namespace CookingRecipeApi.Repositories.Repos
             }
         }
 
-        public async Task<Notification> PushNotification(Notification notification, string userId)
+        public async Task<Notification> PushNotification(string userId, Notification notification)
         {
-            var filter = Builders<NotificationBatch>.Filter.And(
-                Builders<NotificationBatch>.Filter.Eq(n => n.userId, userId));
+            var filter = Builders<NotificationBatch>.Filter.Eq(n => n.userId, userId);
             var sort = Builders<NotificationBatch>.Sort.Descending(n => n.page);
 
             UpdateResult updateResult;
@@ -123,11 +122,12 @@ namespace CookingRecipeApi.Repositories.Repos
             }
         }
 
-        public Task UpdateNotification(Notification notification)
+        public Task UpdateNotification(string userId, Notification notification)
         {
             var page = notification.offSet / _notificationBatchSize;
             var offset = notification.offSet % _notificationBatchSize;
-            var filter = Builders<NotificationBatch>.Filter.Eq(n => n.page, page);
+            var filter = Builders<NotificationBatch>.Filter
+                .Where(s=>s.userId==userId && s.page==page);
             var update = Builders<NotificationBatch>.Update.Set(n => n.notifications[offset], notification);
             return _notificationBatchCollection.UpdateOneAsync(filter, update);
         }

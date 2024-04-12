@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 namespace CookingRecipeApi.Models
 {
+    [BsonIgnoreExtraElements]
     public class Recipe
     {
         [BsonId]
@@ -13,11 +14,10 @@ namespace CookingRecipeApi.Models
         public string instruction { get; set; }
         public DateTime createdAt { get; set; }
         public DateTime updatedAt { get; set; }
-        public uint representIndex { get; set; }
+        public int representIndex { get; set; }
         public List<string> attachmentUrls { get; set; }
-        public List<string> Categories { get; set; }
+        public string categories { get; set; }
         public int likes { get; set; }
-        public List<string> commentBatchIds { get; set; }
         public TimeSpan cookTime { get; set; }
         public Dictionary<string, string> ingredients { get; set; }
         public bool isPublished { get; set; }
@@ -27,13 +27,14 @@ namespace CookingRecipeApi.Models
             id = string.Empty;
             title = string.Empty;
             likes = 0;
+            representIndex = -1;
+            categories = string.Empty;
             userId = string.Empty;
             instruction = string.Empty;
             isPublished = false;
             createdAt = DateTime.UtcNow;
             updatedAt = DateTime.UtcNow;
             attachmentUrls = new List<string>();
-            commentBatchIds = new List<string>();
             ingredients = new Dictionary<string, string>();
         }
     }

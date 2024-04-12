@@ -14,13 +14,15 @@ namespace CookingRecipeApi.RequestsResponses.RecipeRequests
         [Required]
         [StringLength(10000, MinimumLength = 1)]
         public string instruction { get; set; }
+        [Required]
+        public int representIndex { get; set; } = -1;
         public List<string>? keepUrls { get; set; }
         public List<IFormFile>? files { get; set; }
         [TimeSpanModelStateValidation]
         [SwaggerSchema(Format = "uint32", Description = "60")]
-        public TimeSpan cookTime { get; set; }
+        public TimeSpan cookTime { get; set; } = TimeSpan.Zero;
         public Dictionary<string, string> ingredients { get; set; }
-        public bool isPublished { get; set; }
+        public bool isPublished { get; set; } = false;
         // must provide to do replace async
         public DateTime createdAt { get; set; }
 

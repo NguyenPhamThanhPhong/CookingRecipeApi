@@ -19,16 +19,15 @@ namespace CookingRecipeApi.Repositories.Repos
             try
             {
                 await _recipeCollection.InsertOneAsync(recipe);
+                var userFilter = Builders<User>.Filter.Eq(u => u.id, recipe.userId);
+                var userUpdate = Builders<User>.Update.Push(u => u.recipeIds, recipe.id);
+                await _userCollection.UpdateOneAsync(userFilter, userUpdate);
+                return recipe;
             }
             catch
             {
                 return null;
             }
-
-            var userFilter = Builders<User>.Filter.Eq(u => u.id, recipe.userId);
-            var userUpdate = Builders<User>.Update.Push(u => u.recipeIds, recipe.id);
-            await _userCollection.UpdateOneAsync(userFilter, userUpdate);
-            return recipe;
         }
 
         public async Task<Recipe?> DeleteRecipe(string id, string userID)
