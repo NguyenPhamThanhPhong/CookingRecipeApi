@@ -15,7 +15,7 @@ namespace CookingRecipeApi.RequestsResponses.RecipeRequests
         [StringLength(10000, MinimumLength = 1)]
         public string instruction { get; set; }
         public string description { get; set; }
-
+        public string categories { get; set; }
         [Required]
         public int representIndex { get; set; } = -1;
         public List<string>? keepUrls { get; set; }
