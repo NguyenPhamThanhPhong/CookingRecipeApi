@@ -19,15 +19,18 @@ namespace CookingRecipeApi.Models
         public List<string> attachmentUrls { get; set; }
         public string categories { get; set; }
         public int likes { get; set; }
+        public int serves { get; set; }
         public TimeSpan cookTime { get; set; }
-        public Dictionary<string, string> ingredients { get; set; }
+        public List<string> ingredients { get; set; }
         public bool isPublished { get; set; }
+        public bool isVegan { get; set; }
 
         public Recipe()
         {
             id = string.Empty;
             title = string.Empty;
             likes = 0;
+            serves = 1;
             representIndex = -1;
             description = string.Empty;
             categories = string.Empty;
@@ -37,7 +40,8 @@ namespace CookingRecipeApi.Models
             createdAt = DateTime.UtcNow;
             updatedAt = DateTime.UtcNow;
             attachmentUrls = new List<string>();
-            ingredients = new Dictionary<string, string>();
+            ingredients = new List<string>();
+            isVegan = false;
         }
     }
 }

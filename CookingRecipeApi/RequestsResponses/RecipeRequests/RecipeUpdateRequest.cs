@@ -16,6 +16,7 @@ namespace CookingRecipeApi.RequestsResponses.RecipeRequests
         public string instruction { get; set; }
         public string description { get; set; }
         public string categories { get; set; }
+        public int serves { get; set; }
         [Required]
         public int representIndex { get; set; } = -1;
         public List<string>? keepUrls { get; set; }
@@ -23,10 +24,12 @@ namespace CookingRecipeApi.RequestsResponses.RecipeRequests
         [TimeSpanModelStateValidation]
         [SwaggerSchema(Format = "uint32", Description = "60")]
         public TimeSpan cookTime { get; set; } = TimeSpan.Zero;
-        public Dictionary<string, string> ingredients { get; set; }
+        public List<string> ingredients { get; set; }
         public bool isPublished { get; set; } = false;
         // must provide to do replace async
         public DateTime createdAt { get; set; }
+
+        public bool isVegan { get; set; }
 
     }
 }
