@@ -35,9 +35,13 @@ namespace CookingRecipeApi.Models
 
     public class AuthenticationInformation
     {
+        [BsonIgnoreIfNull]
         public string? googleId { get; set; }
+        [BsonIgnoreIfNull]
         public string? facebookId { get; set; }
+        [BsonIgnoreIfNull]
         public string? email { get; set; }
+        [BsonIgnoreIfNull]
         public string? password { get; set; }
         public AuthenticationInformation()
         {
