@@ -14,5 +14,13 @@ namespace CookingRecipeApi.RequestsResponses.UserRequests
         public string bio { get; set; }
         public List<string> categories { get; set; }
         public int hungryHeads { get; set; }
+        public UserUpdateRequest()
+        {
+            categories = new List<string>();
+            avatarUrl = string.Empty;
+            isVegan = false;
+            bio = string.Empty;
+            hungryHeads = 0;
+        }
     }
 }

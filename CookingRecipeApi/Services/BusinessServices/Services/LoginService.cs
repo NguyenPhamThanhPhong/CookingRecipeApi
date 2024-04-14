@@ -33,7 +33,8 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         public async Task<Tuple<string,string,User>?> LoginwithGmail(string email,string password)
         {
             var user = await _userCollection.Find(s=>s.authenticationInfo.email == email).FirstOrDefaultAsync();
-            if(user.authenticationInfo.email!=email || user.authenticationInfo.password!=password)
+            if(user==null || user.authenticationInfo.email!=email 
+                || user.authenticationInfo.password!=password)
             {
                 return null;
             }

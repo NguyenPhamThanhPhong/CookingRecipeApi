@@ -17,15 +17,14 @@ namespace CookingRecipeApi.Configs
                 googleId = src.googleId,
                 facebookId = src.facebookId
             }));
-            CreateMap<UserUpdateRequest,User>().ForMember(dest => dest.profileInfo, opt => opt.MapFrom(src => new ProfileInformation
-            {
-                fullName = src.fullName,
-                avatarUrl = src.avatarUrl,
-                isVegan = src.isVegan,
-                bio = src.bio,
-                categories = src.categories,
-                hungryHeads = src.hungryHeads
-            })).ReverseMap();
+            CreateMap<UserUpdateRequest, ProfileInformation>();
+                //.ForMember(dest => dest.fullName, opt => opt.MapFrom(src => src.fullName))
+                //.ForMember(dest => dest.avatarUrl, opt => opt.MapFrom(src => src.avatarUrl))
+                //.ForMember(dest => dest.isVegan, opt => opt.MapFrom(src => src.isVegan))
+                //.ForMember(dest => dest.bio, opt => opt.MapFrom(src => src.bio))
+                //.ForMember(dest => dest.categories, opt => opt.MapFrom(src => src.categories))
+                //.ForMember(dest => dest.hungryHeads, opt => opt.MapFrom(src => src.hungryHeads));
+
             CreateMap<RecipeCreateRequest, Recipe>();
             // mapping keepUrls => attatchmentUrls
             CreateMap<RecipeUpdateRequest, Recipe>().ForMember(dest => dest.attachmentUrls, opt => opt.MapFrom(src => src.keepUrls));

@@ -30,7 +30,7 @@ namespace CookingRecipeApi.Controllers
         }
         [Authorize]
         [HttpPut("update-profile")]
-        public async Task<IActionResult> UpdateProfile(UserUpdateRequest request)
+        public async Task<IActionResult> UpdateProfile([FromForm]UserUpdateRequest request)
         {
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userID == null)

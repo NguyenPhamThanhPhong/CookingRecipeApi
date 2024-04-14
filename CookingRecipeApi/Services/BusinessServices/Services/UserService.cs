@@ -94,7 +94,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
 
-        public async Task<bool> UpdateProfilebyId(UserUpdateRequest request, string userId)
+        public async Task<ProfileInformation> UpdateProfilebyId(UserUpdateRequest request, string userId)
         {
             var profile = _mapper.Map<ProfileInformation>(request);
             if(request.avatarImg != null)
@@ -108,7 +108,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             //remove old avatar since new avatar is set
             if (request.avatarImg!= null)
                 await _azureBlobHandler.DeleteBlob(user.profileInfo.avatarUrl);
-            return user != null;
+            return profile;
         }
     }
 }
