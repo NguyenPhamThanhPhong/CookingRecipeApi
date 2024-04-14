@@ -125,6 +125,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
 
         public async Task<IEnumerable<Recipe>> SearchRecipes(string searchTerm, int page)
         {
+            searchTerm = Regex.Replace(searchTerm, @"[^\w\s]", "");
             var regex = new BsonRegularExpression(new Regex(Regex.Escape(searchTerm), RegexOptions.IgnoreCase));
             var filer = Builders<Recipe>.Filter.Or(
                 Builders<Recipe>.Filter.Regex(s => s.title, regex),
