@@ -74,7 +74,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
                 }
             }
             var user = _mapper.Map<User>(request);
-            await _userRepository.CreateUser(user);
+            user = await _userRepository.CreateUser(user);
             if (user == null)
                 return null;
             var refreshToken = _tokenGenerator.GenerateRefreshToken();

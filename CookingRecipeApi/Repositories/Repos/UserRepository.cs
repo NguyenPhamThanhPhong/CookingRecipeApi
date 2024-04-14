@@ -21,8 +21,13 @@ namespace CookingRecipeApi.Repositories.Repos
                 await _userCollection.InsertOneAsync(user);
                 return user;
             }
-            catch
+            catch(MongoException ex)
             {
+                Console.WriteLine(ex.Message);
+                if(ex.Message.Contains("duplicate key error"))
+                {
+                    return null;
+                }
                 return null;
             }
         }

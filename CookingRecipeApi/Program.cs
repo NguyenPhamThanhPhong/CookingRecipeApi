@@ -25,13 +25,18 @@ app.Lifetime.ApplicationStopping.Register(() =>
 
 
 string? ipv4Address = (Dns.GetHostAddresses(Dns.GetHostName()).Where(ip => ip.AddressFamily == AddressFamily.InterNetwork).FirstOrDefault())?.ToString();
+string? httpPath = $"http://{ipv4Address}:{5115}";
 
 Console.WriteLine($"Server is running on https://{ipv4Address}:{7000}/swagger/index.html");
+Console.WriteLine($"Server is running on http://{ipv4Address}:{5115}/swagger/index.html");
+
 // Configure the HTTP request pipeline.
 
 if (app.Environment.IsDevelopment())
 {
     IdentityModelEventSource.ShowPII = true;
+    //print application url please
+    //help me print application url
     app.UseSwagger();
     app.UseSwaggerUI();
 }

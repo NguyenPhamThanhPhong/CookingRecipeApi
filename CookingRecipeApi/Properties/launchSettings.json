@@ -14,10 +14,10 @@
       "dotnetRunMessages": true,
       "launchBrowser": false,
       "launchUrl": "swagger",
-      "applicationUrl": "http://localhost:5115",
+      "applicationUrl": "https://localhost:7000;http://localhost:5115",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "http://*:7000" // Added environment variable
+        "ASPNETCORE_URLS": "https://*:7000;http://*:5115" // Added environment variable
       }
     },
     "https": {
@@ -28,7 +28,7 @@
       "applicationUrl": "https://localhost:7000;http://localhost:5115", // Adjusted https for consistency
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "https://*:7000" // Added environment variable
+        "ASPNETCORE_URLS": "https://*:7000;http://*:5115" // Added environment variable
       }
     },
     "IIS Express": {

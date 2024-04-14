@@ -35,7 +35,7 @@ namespace CookingRecipeApi.Controllers
         {
             var result = await _loginService.Register(request);
             if(result == null)
-                return BadRequest("Invalid request");
+                return BadRequest("User account info already exists");
 
             return Ok(new { refreshToken = result.Item1, accessToken = result.Item2, user = result.Item3 });
         }
