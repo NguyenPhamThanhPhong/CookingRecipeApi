@@ -41,10 +41,6 @@ namespace CookingRecipeApi.Models
         public string? password { get; set; }
         public AuthenticationInformation()
         {
-            this.googleId = string.Empty;
-            this.facebookId = string.Empty;
-            this.email = string.Empty;
-            this.password = string.Empty;
         }
     }
 

@@ -3,12 +3,14 @@ using CookingRecipeApi.Configs;
 using CookingRecipeApi.Hubs;
 using CookingRecipeApi.Services.RabbitMQServices;
 using Microsoft.IdentityModel.Logging;
+using System;
+using System.Net;
+using System.Net.Sockets;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.ConfigureServices(builder.Configuration);
 //builder.Services.AddOutputCache();
-
 var app = builder.Build();
 
 // SETUP RABBITMQ consumer
@@ -21,6 +23,10 @@ app.Lifetime.ApplicationStopping.Register(() =>
     rabbitMQService.Dispose();
 });
 
+
+string? ipv4Address = (Dns.GetHostAddresses(Dns.GetHostName()).Where(ip => ip.AddressFamily == AddressFamily.InterNetwork).FirstOrDefault())?.ToString();
+
+Console.WriteLine($"Server is running on https://{ipv4Address}:{7000}/swagger/index.html");
 // Configure the HTTP request pipeline.
 
 if (app.Environment.IsDevelopment())
