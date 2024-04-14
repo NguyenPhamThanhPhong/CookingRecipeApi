@@ -17,6 +17,7 @@ namespace CookingRecipeApi.RequestsResponses.RecipeRequests
         public string description { get; set; }
         public string categories { get; set; }
         //count <= 3 and each file size <= 5MB
+        public int serves { get; set; }
         public List<IFormFile>? files { get; set; }
         [Required]
         public int representIndex { get; set; } = -1;
@@ -24,7 +25,8 @@ namespace CookingRecipeApi.RequestsResponses.RecipeRequests
         [SwaggerSchema(Format = "uint32",Description ="60")]
         public TimeSpan cookTime { get; set; }
         [Required]
-        public Dictionary<string, string> ingredients { get; set; }
+        public List<string> ingredients { get; set; }
         public bool isPublished { get; set; }
+        public bool isVegan { get; set; }
     }
 }
