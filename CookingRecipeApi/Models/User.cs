@@ -12,7 +12,6 @@ namespace CookingRecipeApi.Models
             this.createdAt = DateTime.UtcNow;
             this.authenticationInfo = new AuthenticationInformation();
             this.profileInfo = new ProfileInformation();
-            this.notificationBatchIds = new List<string>();
             this.recipeIds = new List<string>();
             this.savedRecipeIds = new List<string>();
             this.followingIds = new List<string>();
@@ -27,9 +26,6 @@ namespace CookingRecipeApi.Models
         public DateTime createdAt { get; set; } = DateTime.Now;
         public AuthenticationInformation authenticationInfo { get; set; }
         public ProfileInformation profileInfo { get; set; }
-
-        public List<string> notificationBatchIds { get; set; }
-        public string? currentNotificationBatchId { get; set; }
         public List<string> recipeIds { get; set; }
         public List<string> savedRecipeIds { get; set; }
         public List<string> followingIds { get; set; }

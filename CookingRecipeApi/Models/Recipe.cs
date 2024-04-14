@@ -11,6 +11,7 @@ namespace CookingRecipeApi.Models
         public string id { get; set; }
         public string userId { get; set; }
         public string title { get; set; }
+        public string description { get; set; }
         public string instruction { get; set; }
         public DateTime createdAt { get; set; }
         public DateTime updatedAt { get; set; }
@@ -28,6 +29,7 @@ namespace CookingRecipeApi.Models
             title = string.Empty;
             likes = 0;
             representIndex = -1;
+            description = string.Empty;
             categories = string.Empty;
             userId = string.Empty;
             instruction = string.Empty;

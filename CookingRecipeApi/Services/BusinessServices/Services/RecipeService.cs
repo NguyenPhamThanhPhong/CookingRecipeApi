@@ -6,8 +6,10 @@ using CookingRecipeApi.RequestsResponses.RecipeRequests;
 using CookingRecipeApi.Services.AzureBlobServices;
 using CookingRecipeApi.Services.BusinessServices.IServicies;
 using CookingRecipeApi.Services.RabbitMQServices;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace CookingRecipeApi.Services.BusinessServices.Services
 {
@@ -119,6 +121,16 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var update = Builders<User>.Update.Push(s => s.savedRecipeIds, recipeId);
             return _userCollection.UpdateOneAsync(s => s.id == userId, update)
                 .ContinueWith(s => s.Result.ModifiedCount > 0);
+        }
+
+        public async Task<IEnumerable<Recipe>> SearchRecipes(string searchTerm, int page)
+        {
+            var regex = new BsonRegularExpression(new Regex(Regex.Escape(searchTerm), RegexOptions.IgnoreCase));
+            var filer = Builders<Recipe>.Filter.Or(
+                Builders<Recipe>.Filter.Regex(s => s.title, regex),
+                Builders<Recipe>.Filter.Regex(s => s.categories, regex));
+            var sort = Builders<Recipe>.Sort.Descending(s => s.likes)/*.Descending(s=>s.createdAt);*/;
+            return await _recipeCollection.Find(filer).Sort(sort).Limit(10).Skip(page).ToListAsync();
         }
     }
     public enum RecipeNotificationType

@@ -14,6 +14,7 @@ namespace CookingRecipeApi.RequestsResponses.RecipeRequests
         [Required]
         [StringLength(10000, MinimumLength = 1)]
         public string instruction { get; set; }
+        public string description { get; set; }
         //count <= 3 and each file size <= 5MB
         public List<IFormFile>? files { get; set; }
         [Required]
