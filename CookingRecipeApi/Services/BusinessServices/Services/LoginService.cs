@@ -63,7 +63,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var accessToken = _tokenGenerator.GenerateAccessToken(user);
             return new Tuple<string, string, User>(refreshToken, accessToken, user);
         }
-        public async Task<User?> Register(RegisterRequest request)
+        public async Task<Tuple<string, string, User>?> Register(RegisterRequest request)
         {
             if(request.email == null || request.password == null)
             {
@@ -74,7 +74,11 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             }
             var user = _mapper.Map<User>(request);
             await _userRepository.CreateUser(user);
-            return user;
+            if (user == null)
+                return null;
+            var refreshToken = _tokenGenerator.GenerateRefreshToken();
+            var accessToken = _tokenGenerator.GenerateAccessToken(user);
+            return new Tuple<string, string, User>(refreshToken, accessToken, user);
         }
 
         public async Task<User?> GetUserfromRefreshToken(string refreshToken)

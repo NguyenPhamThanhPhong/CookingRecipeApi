@@ -33,11 +33,11 @@ namespace CookingRecipeApi.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            var user = await _loginService.Register(request);
-            if(user == null)
+            var result = await _loginService.Register(request);
+            if(result == null)
                 return BadRequest("Invalid request");
 
-            return Ok(user);
+            return Ok(new { refreshToken = result.Item1, accessToken = result.Item2, user = result.Item3 });
         }
         [Authorize]
         [HttpGet("test-login")]
