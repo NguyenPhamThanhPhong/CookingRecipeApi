@@ -59,45 +59,38 @@ namespace CookingRecipeApi
             AuthenticationConfigs authenticationConfigs = new AuthenticationConfigs();
             config.GetSection("AuthenticationConfigs").Bind(authenticationConfigs);
             services.AddSingleton(authenticationConfigs);
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options =>
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
                 // help config to know the KID of the token
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = false,
-                    ValidateIssuerSigningKey = false,
-                    RequireSignedTokens = false,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateIssuerSigningKey = true,
                     ValidIssuer = authenticationConfigs.Issuer,
                     ValidAudience = authenticationConfigs.Audience,
-                    IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, validationParameters) =>
-                    {
-                        // Implement your custom logic to resolve the signing key based on the key identifier (kid)
-                        // Here, you can retrieve the key based on the key identifier from a key store or configuration
-                        // For demonstration purposes, let's assume the key is retrieved from a dictionary based on the key identifier
-                        if (keyIdentifier != null)
-                        {
-                            var kid = keyIdentifier.ToUpper();
-                            return new List<SecurityKey> { new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationConfigs.AccessTokenSecret)) };
-
-                        }
-                        return null;
-                    },
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationConfigs.AccessTokenSecret))
                 };
-
-
                 options.Events = new JwtBearerEvents
                 {
                     OnAuthenticationFailed = context =>
                     {
-                        //Console.WriteLine("OnAuthenticationFailed: " + context.Exception.Message);
+                        Console.WriteLine("OnAuthenticationFailed: " + context.Exception.Message);
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        Console.WriteLine("OnTokenValidated: " + context.SecurityToken);
+                        return Task.CompletedTask;
+                    },
+                    OnChallenge = context =>
+                    {
+                        Console.WriteLine("OnChallenge: " + context);
+                        return Task.CompletedTask;
+                    },
+                    OnForbidden = context =>
+                    {
+                        Console.WriteLine("OnForbidden: " + context.Result.ToString());
                         return Task.CompletedTask;
                     },
                 };
