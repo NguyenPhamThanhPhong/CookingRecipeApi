@@ -58,7 +58,7 @@ namespace CookingRecipeApi.Controllers
             await _recipeService.NotifyRecipe(userID, name, recipe,RecipeNotificationType.Creation);
             return Ok(recipe);
         }
-        [HttpGet("/search-categories/{searchTerm}/{page}")]
+        [HttpGet("search-categories/{searchTerm}/{page}")]
         public async Task<IActionResult> SearchbyCategory(string searchTerm,int page) 
         {
             var recipes = await _recipeService.SearchRecipes(searchTerm,page);
