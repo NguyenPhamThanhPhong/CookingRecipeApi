@@ -23,12 +23,19 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             _tokenGenerator = tokenGenerator;
             _mapper = mapper;
         }
-        private Task<string> StoreRefreshToken(User user,string deviceId,string deviceInfo)
+        private Task<string> StoreRefreshToken(string userId,string deviceId,string deviceInfo)
         {
             var refreshToken = _tokenGenerator.GenerateRefreshToken();
+            var filter = Builders<User>.Filter.And(
+                Builders<User>.Filter.Eq(s => s.id, userId),
+                Builders<User>.Filter.ElemMatch(s => s.loginTickets, ticket => ticket.deviceId == deviceId));
+
             var loginTicket = new LoginTicket(refreshToken,deviceId,deviceInfo);
-            var update = Builders<User>.Update.Push(s => s.loginTickets, loginTicket);
-            return _userCollection.UpdateOneAsync(s => s.id == user.id, update).ContinueWith(s => refreshToken);
+            var update = Builders<User>.Update.Combine(
+                Builders<User>.Update.SetOnInsert(s => s.loginTickets[-1], 
+                new LoginTicket(refreshToken, deviceId, deviceInfo)));
+            return _userCollection.UpdateOneAsync(filter, update)
+                .ContinueWith(returnValue => refreshToken);
         }
         public async Task<Tuple<string,string,User>?> LoginwithGmail(string email,string password)
         {
