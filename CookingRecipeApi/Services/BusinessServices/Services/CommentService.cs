@@ -2,7 +2,6 @@
 using CookingRecipeApi.Configs;
 using CookingRecipeApi.Models;
 using CookingRecipeApi.Repositories.Interfaces;
-using CookingRecipeApi.RequestsResponses.CommentRequests;
 using MongoDB.Driver;
 
 namespace CookingRecipeApi.Services.BusinessServices.Services

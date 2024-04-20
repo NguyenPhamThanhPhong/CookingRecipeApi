@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using CookingRecipeApi.RequestsResponses.RecipeRequests;
 using CookingRecipeApi.Services.BusinessServices.IServicies;
 using CookingRecipeApi.Services.RabbitMQServices;
 using CookingRecipeApi.Services.BusinessServices.Services;
@@ -8,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Swashbuckle.AspNetCore.Annotations;
+using CookingRecipeApi.RequestsResponses.Requests.RecipeRequests;
 
 namespace CookingRecipeApi.Controllers
 {
@@ -58,7 +58,7 @@ namespace CookingRecipeApi.Controllers
             await _recipeService.NotifyRecipe(userID, name, recipe,RecipeNotificationType.Creation);
             return Ok(recipe);
         }
-        [HttpGet("/search-categories/{searchTerm}/{page}")]
+        [HttpGet("search-categories/{searchTerm}/{page}")]
         public async Task<IActionResult> SearchbyCategory(string searchTerm,int page) 
         {
             var recipes = await _recipeService.SearchRecipes(searchTerm,page);

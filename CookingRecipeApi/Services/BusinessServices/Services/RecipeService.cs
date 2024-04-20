@@ -2,7 +2,7 @@
 using CookingRecipeApi.Configs;
 using CookingRecipeApi.Models;
 using CookingRecipeApi.Repositories.Interfaces;
-using CookingRecipeApi.RequestsResponses.RecipeRequests;
+using CookingRecipeApi.RequestsResponses.Requests.RecipeRequests;
 using CookingRecipeApi.Services.AzureBlobServices;
 using CookingRecipeApi.Services.BusinessServices.IServicies;
 using CookingRecipeApi.Services.RabbitMQServices;

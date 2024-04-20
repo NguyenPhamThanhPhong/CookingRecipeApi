@@ -1,5 +1,5 @@
 ﻿using CookingRecipeApi.Models;
-using CookingRecipeApi.RequestsResponses.RecipeRequests;
+using CookingRecipeApi.RequestsResponses.Requests.RecipeRequests;
 using CookingRecipeApi.Services.BusinessServices.Services;
 
 namespace CookingRecipeApi.Services.BusinessServices.IServicies

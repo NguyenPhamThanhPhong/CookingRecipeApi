@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="RequestsResponses\NotificationRequests\" />
+    <Folder Include="RequestsResponses\Requests\NotificationRequests\" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,8 @@
-﻿namespace CookingRecipeApi.Models
+﻿using MongoDB.Bson.Serialization.Attributes;
+
+namespace CookingRecipeApi.Models
 {
+    [BsonIgnoreExtraElements]
 public class CommentBatch
 {
     public string id { get; set; }
@@ -17,7 +20,7 @@ public class CommentBatch
         comments = new List<Comment?>();
     }
 }
-
+    [BsonIgnoreExtraElements]
     public class Comment
     {
         public int offSet { get; set; }

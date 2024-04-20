@@ -103,21 +103,6 @@ namespace CookingRecipeApi.Repositories.Repos
                     };
                     await _notificationBatchCollection.InsertOneAsync(newNotificationBatch);
                     return notification;
-                    //đoạn này
-                    //var lastNotification = notificationBatch.notifications.Last();
-                    //// why you check lastNotification is null?
-                    //// if lastNotification is null, then the last page is not full
-                    //// so we can add the notification to the last page
-                    //if (lastNotification == null)
-                    //{
-                    //    notification.offSet = _notificationBatchSize - 1;
-                    //    var update = Builders<NotificationBatch>.Update.Set(n => n.notifications[_notificationBatchSize - 1], notification);
-                    //    updateResult = await _notificationBatchCollection.UpdateOneAsync(filter, update);
-                    //    return notification;
-                    //}
-                    //else
-                    //{
-                    //}   
                 }
             }
         }
