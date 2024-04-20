@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CookingRecipeApi.RequestsResponses.UserRequests
+namespace CookingRecipeApi.RequestsResponses.Requests.UserRequests
 {
     public class UserUpdateRequest
     {
-//#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
+        //#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         [Required]
         [StringLength(50, MinimumLength = 1)]
         public string fullName { get; set; }

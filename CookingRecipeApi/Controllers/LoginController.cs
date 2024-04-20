@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using CookingRecipeApi.Models;
-using CookingRecipeApi.RequestsResponses.LoginRequests;
+using CookingRecipeApi.RequestsResponses.Requests.LoginRequests;
 using CookingRecipeApi.Services.AuthenticationServices;
 using CookingRecipeApi.Services.BusinessServices.IServicies;
 using CookingRecipeApi.Services.BusinessServices.Services;
@@ -31,13 +31,13 @@ namespace CookingRecipeApi.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] LoginRegisterRequest request)
         {
             var result = await _loginService.Register(request);
             if(result == null)
                 return BadRequest("User account info already exists");
 
-            return Ok(new { refreshToken = result.Item1, accessToken = result.Item2, user = result.Item3 });
+            return Ok(result);
         }
         [Authorize]
         [HttpGet("test-login")]
@@ -50,32 +50,38 @@ namespace CookingRecipeApi.Controllers
         }
         //first time login
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRegisterRequest request)
         {
             if(request.email == null || request.password == null)
                 return BadRequest("Invalid request");
 
-            var loginResult = await _loginService.LoginwithGmail(request.email,request.password);
+            var loginResult = await _loginService.LoginwithGmail(request);
             if(loginResult == null)
                 return BadRequest("Invalid request");
 
 
-            return Ok(new { refreshToken = loginResult.Item1,accessToken=loginResult.Item2,user=loginResult.Item3 });
+            return Ok(loginResult);
+        }
+        [HttpPost("login-loginId")]
+        //facebook oauth login
+        public async Task<IActionResult> LoginWithFacebook([FromBody] LoginRegisterRequest request)
+        {
+            var result = await _loginService.LoginwithLoginId(request);
+            if (result == null)
+                return BadRequest("Invalid request");
+            return Ok(result);
         }
         [HttpPost("auto-login")]
+        //refresh token
         public async Task<IActionResult> GetAccessToken([FromBody] string refreshToken)
         {
-            bool isRefreshTokenValid = _tokenGenerator.ValidateToken(refreshToken);
-            if(!isRefreshTokenValid)
-                return Unauthorized("Invalid request");
-
             var user = await _loginService.GetUserfromRefreshToken(refreshToken);
+            Console.WriteLine(JsonSerializer.Serialize(user));
+            Console.WriteLine(refreshToken);
             if(user == null)
                 return BadRequest("Invalid request");
-
             var accessToken = _tokenGenerator.GenerateAccessToken(user);
-
-            return Ok(new {accessToken=accessToken, user=user});
+            return Ok(accessToken);
         }
         [HttpPost("forgot-password")]
         // lấy userId ra từ token, gửi mail cái mật khẩu
@@ -85,33 +91,13 @@ namespace CookingRecipeApi.Controllers
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             if (userId == null || userEmail == null)
                 return BadRequest("Invalid request");
-
             var password = await _loginService.GetUserPassword(userId);
             //send mail
             var result = await _emailService.SendEmail(userEmail, 
                 "Cooking recipe social media: your password is", 
                 $"Your password is: ${password??""} ");
-
             return result ? Ok("Email sent") : BadRequest("Email not sent");
         }
-        [HttpPost("login-facebook")]
-        //facebook oauth login
-        public async Task<IActionResult> LoginWithFacebook([FromBody] string facebookOauthId)
-        {
-            var result = await _loginService.LoginwithFacebook(facebookOauthId);
-            if (result == null)
-                return BadRequest("Invalid request");
 
-            return Ok(new { refreshToken = result.Item1, accessToken = result.Item2, user = result.Item3 });
-        }
-        [HttpPost( "login-google")]
-        //google oauth login
-        public async Task<IActionResult> LoginWithGoogle([FromBody] string googleOauthId)
-        {
-            var result = await _loginService.LoginwithGoogle(googleOauthId);
-            if (result == null)
-                return BadRequest("Invalid request");
-            return Ok(new { refreshToken = result.Item1, accessToken = result.Item2, user = result.Item3 });
-        }
     }
 }

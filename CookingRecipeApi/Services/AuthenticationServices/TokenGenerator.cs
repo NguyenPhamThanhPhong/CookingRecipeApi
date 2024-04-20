@@ -39,6 +39,7 @@ namespace CookingRecipeApi.Services.AuthenticationServices
                 new Claim(ClaimTypes.NameIdentifier,user.id),
                 new Claim(ClaimTypes.Email,user.authenticationInfo.email??""),
                 new Claim(ClaimTypes.Name,user.profileInfo.fullName),
+                new Claim(ClaimTypes.AuthenticationMethod,user.authenticationInfo.linkedAccountType??"default"),
             };
             Console.WriteLine(JsonSerializer.Serialize(claims));
 
@@ -81,8 +82,9 @@ namespace CookingRecipeApi.Services.AuthenticationServices
                     refreshToken, _tokenValidationParameters, out SecurityToken validatedToken);
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return false;
             }
         }

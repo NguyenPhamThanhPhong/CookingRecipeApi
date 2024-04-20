@@ -36,16 +36,15 @@ namespace CookingRecipeApi.Models
     public class AuthenticationInformation
     {
         [BsonIgnoreIfNull]
-        public string? googleId { get; set; }
-        [BsonIgnoreIfNull]
-        public string? facebookId { get; set; }
+        public string? loginId { get; set; }
         [BsonIgnoreIfNull]
         public string? email { get; set; }
         [BsonIgnoreIfNull]
         public string? password { get; set; }
-        public AuthenticationInformation()
-        {
-        }
+        [BsonIgnoreIfNull]
+        public string? linkedAccountType { get; set; }
+
+
     }
 
     public class ProfileInformation
@@ -73,6 +72,18 @@ namespace CookingRecipeApi.Models
         public string deviceInfo { get; set; }
         public DateTime createTime { get; set; }
         public DateTime expireTime { get; set; }
+        public override bool Equals(object? obj)
+        {
+            if(obj is LoginTicket ticket)
+            {
+                return ticket.deviceId == deviceId ;
+            }
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            return deviceId.GetHashCode();
+        }
         public LoginTicket(string refreshToken, string deviceInfo,string deviceId)
         {
             this.deviceId = deviceId;

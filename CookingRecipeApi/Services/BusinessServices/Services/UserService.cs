@@ -2,7 +2,7 @@
 using CookingRecipeApi.Configs;
 using CookingRecipeApi.Models;
 using CookingRecipeApi.Repositories.Interfaces;
-using CookingRecipeApi.RequestsResponses.UserRequests;
+using CookingRecipeApi.RequestsResponses.Requests.UserRequests;
 using CookingRecipeApi.Services.AzureBlobServices;
 using CookingRecipeApi.Services.BusinessServices.IServicies;
 using MongoDB.Bson;

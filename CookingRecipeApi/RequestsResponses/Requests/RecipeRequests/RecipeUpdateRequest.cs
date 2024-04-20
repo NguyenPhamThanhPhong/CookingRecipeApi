@@ -2,9 +2,9 @@
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 
-namespace CookingRecipeApi.RequestsResponses.RecipeRequests
+namespace CookingRecipeApi.RequestsResponses.Requests.RecipeRequests
 {
-    public class RecipeCreateRequest
+    public class RecipeUpdateRequest
     {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         [Required]
@@ -16,17 +16,20 @@ namespace CookingRecipeApi.RequestsResponses.RecipeRequests
         public string instruction { get; set; }
         public string description { get; set; }
         public string categories { get; set; }
-        //count <= 3 and each file size <= 5MB
         public int serves { get; set; }
-        public List<IFormFile>? files { get; set; }
         [Required]
         public int representIndex { get; set; } = -1;
+        public List<string>? keepUrls { get; set; }
+        public List<IFormFile>? files { get; set; }
         [TimeSpanModelStateValidation]
-        [SwaggerSchema(Format = "uint32",Description ="60")]
-        public TimeSpan cookTime { get; set; }
-        [Required]
+        [SwaggerSchema(Format = "uint32", Description = "60")]
+        public TimeSpan cookTime { get; set; } = TimeSpan.Zero;
         public List<string> ingredients { get; set; }
-        public bool isPublished { get; set; }
+        public bool isPublished { get; set; } = false;
+        // must provide to do replace async
+        public DateTime createdAt { get; set; }
+
         public bool isVegan { get; set; }
+
     }
 }

@@ -3,6 +3,7 @@ using MongoDB.Bson;
 
 namespace CookingRecipeApi.Models
 {
+    [BsonIgnoreExtraElements]
     public class NotificationBatch
     {
         [BsonId]
