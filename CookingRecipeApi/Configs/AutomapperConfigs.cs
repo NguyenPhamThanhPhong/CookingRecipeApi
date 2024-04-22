@@ -3,6 +3,7 @@ using CookingRecipeApi.Models;
 using CookingRecipeApi.RequestsResponses.Requests.LoginRequests;
 using CookingRecipeApi.RequestsResponses.Requests.RecipeRequests;
 using CookingRecipeApi.RequestsResponses.Requests.UserRequests;
+using CookingRecipeApi.RequestsResponses.Responses;
 
 namespace CookingRecipeApi.Configs
 {
@@ -21,8 +22,10 @@ namespace CookingRecipeApi.Configs
                     email = src.email,
                     password = src.password,
                     loginId = src.loginId,
+                    linkedAccountType = src.linkedAccountType,
                 }));
             CreateMap<RecipeCreateRequest, Recipe>();
+            CreateMap<User,UserProfileResponse>();
             // mapping keepUrls => attatchmentUrls
             CreateMap<RecipeUpdateRequest, Recipe>().ForMember(dest => dest.attachmentUrls, opt => opt.MapFrom(src => src.keepUrls));
         }

@@ -3,6 +3,7 @@ using CookingRecipeApi.Configs;
 using CookingRecipeApi.Models;
 using CookingRecipeApi.Repositories.Interfaces;
 using CookingRecipeApi.RequestsResponses.Requests.UserRequests;
+using CookingRecipeApi.RequestsResponses.Responses;
 using CookingRecipeApi.Services.AzureBlobServices;
 using CookingRecipeApi.Services.BusinessServices.IServicies;
 using MongoDB.Bson;
@@ -55,11 +56,17 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             return profiles;
         }
 
-        public async Task<IEnumerable<User>> GetUserFromFollowRank()
+        public async Task<User?> getSelf(string id)
+        {
+            return await _userCollection.Find(s=>s.id == id).FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<UserProfileResponse>> GetUserFromFollowRank()
         {
             var sort = Builders<User>.Sort.Descending(s => s.followerIds);
             var users = await _userCollection.Find(s => true).Sort(sort).Limit(10).ToListAsync();
-            return users;
+            List<UserProfileResponse> response = _mapper.Map<List<UserProfileResponse>>(users);
+            return response;
         }
 
         public async Task<bool> UpdateFollow(string id, string followId,bool option)

@@ -7,6 +7,7 @@
         public string? loginId { get; set; } = string.Empty;
         public string? email { get; set; }
         public string? password { get; set; }
+        public string? linkedAccountType { get; set; }
 
 
     }

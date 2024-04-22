@@ -33,6 +33,7 @@ namespace CookingRecipeApi.Models
         public List<LoginTicket> loginTickets { get; set; }
     }
 
+    [BsonIgnoreExtraElements]
     public class AuthenticationInformation
     {
         [BsonIgnoreIfNull]
@@ -46,6 +47,7 @@ namespace CookingRecipeApi.Models
 
 
     }
+    [BsonIgnoreExtraElements]
 
     public class ProfileInformation
     {
@@ -65,6 +67,8 @@ namespace CookingRecipeApi.Models
             this.hungryHeads = 0;
         }
     }
+    [BsonIgnoreExtraElements]
+
     public class LoginTicket
     {
         public string deviceId { get; set; }

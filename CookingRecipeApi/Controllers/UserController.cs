@@ -29,6 +29,17 @@ namespace CookingRecipeApi.Controllers
             return Ok(users);
         }
         [Authorize]
+        [HttpGet()]
+        public async Task<IActionResult> GetSelf()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+                return Unauthorized("NOT AUTHENTICATED");
+            var user = await _userService.getSelf(userId);
+            return Ok(user);
+
+        }
+        [Authorize]
         [HttpPut("update-profile")]
         public async Task<IActionResult> UpdateProfile([FromForm]UserUpdateRequest request)
         {
