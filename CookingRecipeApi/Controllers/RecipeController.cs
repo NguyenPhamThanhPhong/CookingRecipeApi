@@ -33,10 +33,11 @@ namespace CookingRecipeApi.Controllers
                 return NotFound("recipe not found in database");
             return Ok(recipe);
         }
-        [HttpPost("get-many")]
-        public async Task<IActionResult> GetMany([FromQuery] IEnumerable<string> ids)
+        [HttpPost("get-many/{page}")]
+        public async Task<IActionResult> GetMany([FromBody] GetRecipeWithSearchRequest request,int page)
         {
-            var recipes = await _recipeService.GetRecipes(ids);
+            var recipes = await _recipeService
+                .GetRecipeFromIds(request.recipeIds,request.searchTerm,page);
             return Ok(recipes);
         }
         [Authorize]

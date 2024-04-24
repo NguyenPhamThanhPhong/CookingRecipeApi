@@ -55,9 +55,18 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         {
             return _recipeRepository.GetbyRecipeId(id);
         }
-        public Task<IEnumerable<Recipe>> GetRecipes(IEnumerable<string> ids)
+        public async Task<IEnumerable<Recipe>> GetRecipeFromIds(IEnumerable<string> ids, string searchTerm,int page)
         {
-            return _recipeRepository.GetbyRecipeIds(ids);
+            searchTerm = Regex.Replace(searchTerm, @"[^\w\s]", "");
+            Console.WriteLine(searchTerm);
+            var regex = new BsonRegularExpression(new Regex(Regex.Escape(searchTerm), RegexOptions.IgnoreCase));
+            var filter = Builders<Recipe>.Filter.In(s => s.id, ids) 
+                & Builders<Recipe>.Filter.Or(
+                  Builders<Recipe>.Filter.Regex(s => s.title, regex),
+                  Builders<Recipe>.Filter.Regex(s => s.categories, regex));
+            var sort = Builders<Recipe>.Sort.Descending(s => s.likes)/*.Descending(s=>s.createdAt);*/;
+            return await _recipeCollection.Find(filter)
+                .Skip(page * 10).Sort(sort).Limit(10).ToListAsync();
         }
         public async Task<Recipe?> UpdateRecipe(RecipeUpdateRequest request, string userID)
         {

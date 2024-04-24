@@ -10,7 +10,7 @@ namespace CookingRecipeApi.Services.BusinessServices.IServicies
         Task<Recipe?> CreateRecipe(RecipeCreateRequest request,string userId);
         Task<Recipe?> GetRecipeById(string id);
         Task<IEnumerable<Recipe>> SearchRecipes(string searchTerm,int page);
-        Task<IEnumerable<Recipe>> GetRecipes(IEnumerable<string> ids);
+        Task<IEnumerable<Recipe>> GetRecipeFromIds(IEnumerable<string> ids,string searchTerm,int page);
         Task<Recipe?> UpdateRecipe(RecipeUpdateRequest request, string userId);
         Task<bool> DeleteRecipe(string id, string userId);
         Task NotifyRecipe(string userId, string userfullName, Recipe recipe, RecipeNotificationType type);
