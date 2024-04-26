@@ -9,9 +9,9 @@ namespace CookingRecipeApi.Services.BusinessServices.IServicies
         //userId to validate the user from token
         Task<Recipe?> CreateRecipe(RecipeCreateRequest request,string userId);
         Task<Recipe?> GetRecipeById(string id);
-        Task<IEnumerable<Recipe>> GetRecipesSaved(string userId,int page,string searchTerm);
-        Task<IEnumerable<Recipe>> GetRecipesSearch(string searchTerm,int page);
-        Task<IEnumerable<Recipe>> GetRecipesFromIds(IEnumerable<string> ids,string searchTerm,int page);
+        Task<IEnumerable<Recipe>> GetRecipesSaved(string userId,GetRecipeSearchRequest request,int page);
+        Task<IEnumerable<Recipe>> GetRecipesSearch(GetRecipeSearchRequest request,int page);
+        Task<IEnumerable<Recipe>> GetRecipesFromIds(IEnumerable<string> recipeIds);
         Task<Recipe?> UpdateRecipe(RecipeUpdateRequest request, string userId);
         Task<bool> DeleteRecipe(string id, string userId);
         Task NotifyRecipe(string userId, string userfullName, Recipe recipe, RecipeNotificationType type);

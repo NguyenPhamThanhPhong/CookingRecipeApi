@@ -33,23 +33,23 @@ namespace CookingRecipeApi.Controllers
                 return NotFound("recipe not found in database");
             return Ok(recipe);
         }
-        [HttpPost("get-many/{page}")]
-        public async Task<IActionResult> GetMany([FromBody] GetRecipeWithSearchRequest request,int page)
+        [HttpPost("get-from-ids")]
+        public async Task<IActionResult> GetMany([FromBody] IEnumerable<string> recipeIds)
         {
             var recipes = await _recipeService
-                .GetRecipesFromIds(request.recipeIds,request.searchTerm,page);
+                .GetRecipesFromIds(recipeIds);
             return Ok(recipes);
         }
         [Authorize]
-        [HttpGet("get-saved-recipes/{page}/{searchTerm}")]
-        public async Task<IActionResult> GetSavedRecipes(int page, string searchTerm)
+        [HttpPost("get-saved-recipes/{page}")]
+        public async Task<IActionResult> GetSavedRecipes([FromBody]GetRecipeSearchRequest request,int page)
         {
             if (!ModelState.IsValid)
                 return BadRequest("request invalid");
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userID == null)
                 return Unauthorized("userId not found in token");
-            var recipes =  await _recipeService.GetRecipesSaved(userID,page,searchTerm);
+            var recipes =  await _recipeService.GetRecipesSaved(userID, request,page);
             return Ok(recipes);
         }
         [Authorize]
@@ -71,10 +71,10 @@ namespace CookingRecipeApi.Controllers
             await _recipeService.NotifyRecipe(userID, name, recipe,RecipeNotificationType.Creation);
             return Ok(recipe);
         }
-        [HttpGet("search-categories/{searchTerm}/{page}")]
-        public async Task<IActionResult> SearchbyCategory(string searchTerm,int page) 
+        [HttpPost("search/{page}")]
+        public async Task<IActionResult> SearchbyCategory(GetRecipeSearchRequest request,int page) 
         {
-            var recipes = await _recipeService.GetRecipesSearch(searchTerm,page);
+            var recipes = await _recipeService.GetRecipesSearch(request,page);
             return Ok(recipes);
         }
         [Authorize]
