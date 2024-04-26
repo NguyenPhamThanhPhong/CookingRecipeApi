@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CookingRecipeApi.Configs;
+using CookingRecipeApi.Helper;
 using CookingRecipeApi.Models;
 using CookingRecipeApi.Repositories.Interfaces;
 using CookingRecipeApi.RequestsResponses.Requests.RecipeRequests;
@@ -57,13 +58,9 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         }
         public async Task<IEnumerable<Recipe>> GetRecipesFromIds(IEnumerable<string> ids, string searchTerm,int page)
         {
-            searchTerm = Regex.Replace(searchTerm, @"[^\w\s]", "");
-            Console.WriteLine(searchTerm);
-            var regex = new BsonRegularExpression(new Regex(Regex.Escape(searchTerm), RegexOptions.IgnoreCase));
-            var filter = Builders<Recipe>.Filter.In(s => s.id, ids) 
-                & Builders<Recipe>.Filter.Or(
-                  Builders<Recipe>.Filter.Regex(s => s.title, regex),
-                  Builders<Recipe>.Filter.Regex(s => s.categories, regex));
+            var searchParams = Regex.Split(searchTerm, @"[.,!?;'\s]+").Where(s => s.Length > 0).ToArray();
+            var filter = Builders<Recipe>.Filter.In(s => s.id, ids);
+            ChainingSearchFilter(searchParams, ref filter);
             var sort = Builders<Recipe>.Sort.Descending(s => s.likes)/*.Descending(s=>s.createdAt);*/;
             return await _recipeCollection.Find(filter)
                 .Skip(page * 10).Sort(sort).Limit(10).ToListAsync();
@@ -134,24 +131,48 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
 
         public async Task<IEnumerable<Recipe>> GetRecipesSearch(string searchTerm, int page)
         {
-            searchTerm = Regex.Replace(searchTerm, @"[^\w\s]", "");
-            var regex = new BsonRegularExpression(new Regex(Regex.Escape(searchTerm), RegexOptions.IgnoreCase));
-            var filer = Builders<Recipe>.Filter.Or(
-                Builders<Recipe>.Filter.Regex(s => s.title, regex),
-                Builders<Recipe>.Filter.Regex(s => s.categories, regex));
+            var searchParams = StrUtils.SplitSpecialCharacters(searchTerm);
+            if (searchParams.Length > 0)
+            {
+                List<FilterDefinition<Recipe>> subfilters = new List<FilterDefinition<Recipe>>();
+                foreach (string str in searchParams)
+                {
+                    var regex = new BsonRegularExpression(new Regex(Regex.Escape(str), RegexOptions.IgnoreCase));
+                    subfilters.Add(Builders<Recipe>.Filter.Regex(s => s.title, regex));
+                    subfilters.Add(Builders<Recipe>.Filter.Regex(s => s.categories, regex));
+                }
+                var filter =  Builders<Recipe>.Filter.Or(subfilters);
+                return await _recipeCollection.Find(filter).Skip(page * 10).Limit(10).ToListAsync();
+            }
             var sort = Builders<Recipe>.Sort.Descending(s => s.likes)/*.Descending(s=>s.createdAt);*/;
-            return await _recipeCollection.Find(filer).Sort(sort).Limit(10).Skip(page).ToListAsync();
+            return await _recipeCollection.Find(s=>true)
+                .Sort(sort).Limit(10).Skip(page).ToListAsync();
         }
 
-        public async Task<IEnumerable<Recipe>> GetRecipesSaved(string userId, int page)
+        public async Task<IEnumerable<Recipe>> GetRecipesSaved(string userId, int page, string searchTerm)
         {
+            string pattern = @"[.,!?;'\s]+";
+            var searchParams = Regex.Split(searchTerm,pattern).Where(s => s.Length > 0).ToArray();
             var savedRecipeIds= await _userCollection.Find(s => s.id == userId)
                 .Project(s => s.savedRecipeIds).FirstOrDefaultAsync();
-
             var filter = Builders<Recipe>.Filter.In(s => s.id, savedRecipeIds);
-
+            ChainingSearchFilter(searchParams, ref filter);
             return await _recipeCollection
                 .Find(filter).Skip(page * 10).Limit(10).ToListAsync();
+        }
+        private void ChainingSearchFilter(string[] searchParams, ref FilterDefinition<Recipe> filter)
+        {
+            if (searchParams.Length > 0)
+            {
+                List<FilterDefinition<Recipe>> subfilters = new List<FilterDefinition<Recipe>>();
+                foreach (string str in searchParams)
+                {
+                    var regex = new BsonRegularExpression(new Regex(Regex.Escape(str), RegexOptions.IgnoreCase));
+                    subfilters.Add(Builders<Recipe>.Filter.Regex(s => s.title, regex));
+                    subfilters.Add(Builders<Recipe>.Filter.Regex(s => s.categories, regex));
+                }
+                filter = filter & Builders<Recipe>.Filter.Or(subfilters);
+            }
         }
     }
     public enum RecipeNotificationType

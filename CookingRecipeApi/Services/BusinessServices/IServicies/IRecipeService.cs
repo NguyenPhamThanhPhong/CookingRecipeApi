@@ -9,7 +9,7 @@ namespace CookingRecipeApi.Services.BusinessServices.IServicies
         //userId to validate the user from token
         Task<Recipe?> CreateRecipe(RecipeCreateRequest request,string userId);
         Task<Recipe?> GetRecipeById(string id);
-        Task<IEnumerable<Recipe>> GetRecipesSaved(string userId,int page);
+        Task<IEnumerable<Recipe>> GetRecipesSaved(string userId,int page,string searchTerm);
         Task<IEnumerable<Recipe>> GetRecipesSearch(string searchTerm,int page);
         Task<IEnumerable<Recipe>> GetRecipesFromIds(IEnumerable<string> ids,string searchTerm,int page);
         Task<Recipe?> UpdateRecipe(RecipeUpdateRequest request, string userId);

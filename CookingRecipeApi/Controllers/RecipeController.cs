@@ -41,15 +41,15 @@ namespace CookingRecipeApi.Controllers
             return Ok(recipes);
         }
         [Authorize]
-        [HttpGet("get-saved-recipes/{page}")]
-        public async Task<IActionResult> GetSavedRecipes(int page)
+        [HttpGet("get-saved-recipes/{page}/{searchTerm}")]
+        public async Task<IActionResult> GetSavedRecipes(int page, string searchTerm)
         {
             if (!ModelState.IsValid)
                 return BadRequest("request invalid");
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userID == null)
                 return Unauthorized("userId not found in token");
-            var recipes =  await _recipeService.GetRecipesSaved(userID,page);
+            var recipes =  await _recipeService.GetRecipesSaved(userID,page,searchTerm);
             return Ok(recipes);
         }
         [Authorize]
