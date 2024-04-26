@@ -75,22 +75,22 @@ namespace CookingRecipeApi
                 {
                     OnAuthenticationFailed = context =>
                     {
-                        Console.WriteLine("OnAuthenticationFailed: " + context.Exception.Message);
+                        //Console.WriteLine("OnAuthenticationFailed: " + context.Exception.Message);
                         return Task.CompletedTask;
                     },
                     OnTokenValidated = context =>
                     {
-                        Console.WriteLine("OnTokenValidated: " + context.SecurityToken);
+                        //Console.WriteLine("OnTokenValidated: " + context.SecurityToken);
                         return Task.CompletedTask;
                     },
                     OnChallenge = context =>
                     {
-                        Console.WriteLine("OnChallenge: " + context);
+                        //Console.WriteLine("OnChallenge: " + context);
                         return Task.CompletedTask;
                     },
                     OnForbidden = context =>
                     {
-                        Console.WriteLine("OnForbidden: " + context.Result.ToString());
+                        //Console.WriteLine("OnForbidden: " + context.Result.ToString());
                         return Task.CompletedTask;
                     },
                 };

@@ -37,7 +37,19 @@ namespace CookingRecipeApi.Controllers
         public async Task<IActionResult> GetMany([FromBody] GetRecipeWithSearchRequest request,int page)
         {
             var recipes = await _recipeService
-                .GetRecipeFromIds(request.recipeIds,request.searchTerm,page);
+                .GetRecipesFromIds(request.recipeIds,request.searchTerm,page);
+            return Ok(recipes);
+        }
+        [Authorize]
+        [HttpGet("get-saved-recipes/{page}")]
+        public async Task<IActionResult> GetSavedRecipes(int page)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("request invalid");
+            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userID == null)
+                return Unauthorized("userId not found in token");
+            var recipes =  await _recipeService.GetRecipesSaved(userID,page);
             return Ok(recipes);
         }
         [Authorize]
@@ -62,7 +74,7 @@ namespace CookingRecipeApi.Controllers
         [HttpGet("search-categories/{searchTerm}/{page}")]
         public async Task<IActionResult> SearchbyCategory(string searchTerm,int page) 
         {
-            var recipes = await _recipeService.SearchRecipes(searchTerm,page);
+            var recipes = await _recipeService.GetRecipesSearch(searchTerm,page);
             return Ok(recipes);
         }
         [Authorize]
@@ -85,10 +97,12 @@ namespace CookingRecipeApi.Controllers
         [HttpPost("save-recipe/{recipeId}")]
         public async Task<IActionResult> SaveRecipe(string recipeId)
         {
+            Console.WriteLine(recipeId);
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userID == null)
                 return Unauthorized();
-            var result = await _recipeService.SaveRecipe(recipeId, userID);
+
+            var result = await _recipeService.SaveRecipe(userID,recipeId);
             return result ? Ok() : BadRequest();
         }
         [HttpGet("get-from-likes")]
@@ -109,18 +123,18 @@ namespace CookingRecipeApi.Controllers
             await _recipeService.DeleteRecipe(id, userID);
             return Ok();
         }
-        [Authorize]
-        [HttpGet("detect-userId/for-test-only")]
-        [SwaggerOperation(Summary = "Detect user id to notification", 
-            Description = "Detect user id to notification", OperationId = "DetectUserIdtoNotification")]
-        public async Task<IActionResult> DetectUserIdtoNotification()
-        {
-            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userID == null)
-                return Unauthorized();
-            var result = await _notificationService.DetectUserIdtoNotification(userID);
-            return Ok(result);
-        }
 
     }
 }
+//[Authorize]
+//[HttpGet("detect-userId/for-test-only")]
+//[SwaggerOperation(Summary = "Detect user id to notification", 
+//    Description = "Detect user id to notification", OperationId = "DetectUserIdtoNotification")]
+//public async Task<IActionResult> DetectUserIdtoNotification()
+//{
+//    var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+//    if (userID == null)
+//        return Unauthorized();
+//    var result = await _notificationService.DetectUserIdtoNotification(userID);
+//    return Ok(result);
+//}

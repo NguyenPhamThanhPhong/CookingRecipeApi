@@ -55,7 +55,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         {
             return _recipeRepository.GetbyRecipeId(id);
         }
-        public async Task<IEnumerable<Recipe>> GetRecipeFromIds(IEnumerable<string> ids, string searchTerm,int page)
+        public async Task<IEnumerable<Recipe>> GetRecipesFromIds(IEnumerable<string> ids, string searchTerm,int page)
         {
             searchTerm = Regex.Replace(searchTerm, @"[^\w\s]", "");
             Console.WriteLine(searchTerm);
@@ -132,7 +132,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
                 .ContinueWith(s => s.Result.ModifiedCount > 0);
         }
 
-        public async Task<IEnumerable<Recipe>> SearchRecipes(string searchTerm, int page)
+        public async Task<IEnumerable<Recipe>> GetRecipesSearch(string searchTerm, int page)
         {
             searchTerm = Regex.Replace(searchTerm, @"[^\w\s]", "");
             var regex = new BsonRegularExpression(new Regex(Regex.Escape(searchTerm), RegexOptions.IgnoreCase));
@@ -141,6 +141,17 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
                 Builders<Recipe>.Filter.Regex(s => s.categories, regex));
             var sort = Builders<Recipe>.Sort.Descending(s => s.likes)/*.Descending(s=>s.createdAt);*/;
             return await _recipeCollection.Find(filer).Sort(sort).Limit(10).Skip(page).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Recipe>> GetRecipesSaved(string userId, int page)
+        {
+            var savedRecipeIds= await _userCollection.Find(s => s.id == userId)
+                .Project(s => s.savedRecipeIds).FirstOrDefaultAsync();
+
+            var filter = Builders<Recipe>.Filter.In(s => s.id, savedRecipeIds);
+
+            return await _recipeCollection
+                .Find(filter).Skip(page * 10).Limit(10).ToListAsync();
         }
     }
     public enum RecipeNotificationType
