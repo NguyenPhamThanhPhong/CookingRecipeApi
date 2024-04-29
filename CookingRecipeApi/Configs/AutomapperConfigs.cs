@@ -12,22 +12,46 @@ namespace CookingRecipeApi.Configs
         public AutomapperConfigs()
         {
             CreateMap<UserUpdateRequest, ProfileInformation>();
-            CreateMap<LoginRegisterRequest, LoginTicket>()
+            CreateMap<LoginRegisterRequestBase, LoginTicket>()
                 .ConstructUsing(src => new LoginTicket(
-                    string.Empty, src.deviceInfo??"NO DEVICE INFO FOUND", src.deviceId ?? Guid.NewGuid().ToString()));
-            CreateMap<LoginRegisterRequest, User>()
-                .ForMember(dest => dest.authenticationInfo, 
+                    string.Empty, 
+                    src.deviceInfo== string.Empty?"UNKNOWN":"NO DEVICE INFO FOUND", 
+                    src.deviceId ?? Guid.NewGuid().ToString()
+                    ));
+            CreateMap<RegisterWithEmailRequest, User>()
+                .ForMember(dest => dest.authenticationInfo,
                 opt => opt.MapFrom(src => new AuthenticationInformation
                 {
                     email = src.email,
                     password = src.password,
-                    loginId = src.loginId,
-                    linkedAccountType = src.linkedAccountType,
+                }))
+                .ForMember(dest => dest.profileInfo,
+                opt => opt.MapFrom(src => new ProfileInformation
+                {
+                    fullName = src.fullName ?? "",
+                    bio = src.bio ?? "",
                 }));
+
+            CreateMap<RegisterWithLoginIdRequest, User>()
+                .ForMember(dest => dest.authenticationInfo,
+                opt => opt.MapFrom(src => new AuthenticationInformation
+                {
+                    loginId = src.loginId,
+                    linkedAccountType = src.linkedAccountType
+                }))
+                .ForMember(dest => dest.profileInfo,
+                opt => opt.MapFrom(src => new ProfileInformation
+                {
+                    fullName = src.fullName??"",
+                    avatarUrl = src.fileUrl ?? "",
+                    bio = src.bio ?? "",
+                }));
+
             CreateMap<RecipeCreateRequest, Recipe>();
             CreateMap<User,UserProfileResponse>();
             // mapping keepUrls => attatchmentUrls
-            CreateMap<RecipeUpdateRequest, Recipe>().ForMember(dest => dest.attachmentUrls, opt => opt.MapFrom(src => src.keepUrls));
+            CreateMap<RecipeUpdateRequest, Recipe>().ForMember(
+                dest => dest.attachmentUrls, opt => opt.MapFrom(src => src.keepUrls));
         }
     }
 }

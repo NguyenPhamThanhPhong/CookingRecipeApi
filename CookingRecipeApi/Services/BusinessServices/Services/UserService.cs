@@ -101,7 +101,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
 
-        public async Task<ProfileInformation> UpdateProfilebyId(UserUpdateRequest request, string userId)
+        public async Task<ProfileInformation> UpdateProfileBasicbyId(UserUpdateRequest request, string userId)
         {
             var profile = _mapper.Map<ProfileInformation>(request);
             if(request.avatarImg != null)
@@ -116,6 +116,16 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             if (request.avatarImg!= null)
                 await _azureBlobHandler.DeleteBlob(user.profileInfo.avatarUrl);
             return profile;
+        }
+
+        public Task<ProfileInformation> UpdateProfileOptionalbyId(UserUpdateProfileOptional request, string userId)
+        {
+            var update = Builders<User>.Update
+                .Set(s => s.profileInfo.bio, request.bio)
+                .Set(s => s.profileInfo.categories, request.categories)
+                .Set(s => s.profileInfo.hungryHeads, request.hungryHeads);
+            _userCollection.UpdateOne(s => s.id == userId, update);
+            return Task.FromResult(_mapper.Map<ProfileInformation>(request));
         }
     }
 }

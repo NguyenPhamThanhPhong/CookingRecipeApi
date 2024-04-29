@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="RequestsResponses\Requests\NotificationRequests\**" />
+    <Content Remove="RequestsResponses\Requests\NotificationRequests\**" />
+    <EmbeddedResource Remove="RequestsResponses\Requests\NotificationRequests\**" />
+    <None Remove="RequestsResponses\Requests\NotificationRequests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.3" />
@@ -16,10 +23,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.4.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="RequestsResponses\Requests\NotificationRequests\" />
   </ItemGroup>
 
 </Project>

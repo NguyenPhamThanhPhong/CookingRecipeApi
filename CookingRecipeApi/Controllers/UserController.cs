@@ -46,9 +46,20 @@ namespace CookingRecipeApi.Controllers
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userID == null)
                 return Unauthorized("");
-            var result = await _userService.UpdateProfilebyId(request, userID);
+            var result = await _userService.UpdateProfileBasicbyId(request, userID);
             return Ok(result);
         }
+        [Authorize]
+        [HttpPut("update-profile-optional")]
+        public async Task<IActionResult> UpdateProfileOptional([FromForm] UserUpdateProfileOptional request)
+        {
+            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userID == null)
+                return Unauthorized("");
+            var result = await _userService.UpdateProfileOptionalbyId(request, userID);
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProfile(string id)
         {

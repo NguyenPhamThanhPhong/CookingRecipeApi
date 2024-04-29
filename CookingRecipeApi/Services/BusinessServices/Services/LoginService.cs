@@ -43,13 +43,13 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var result = await _userCollection.FindOneAndUpdateAsync(filter, updatePush, findOptions);
             return result;
         }
-        private LoginTicket _generateLoginTicket(LoginRegisterRequest request)
+        private LoginTicket _generateLoginTicket(LoginRegisterRequestBase request)
         {
             LoginTicket loginTicket = _mapper.Map<LoginTicket>(request);
             loginTicket.refreshToken = _tokenGenerator.GenerateRefreshToken();
             return loginTicket;
         }
-        public async Task<UserLoginResponse?> LoginwithGmail(LoginRegisterRequest request)
+        public async Task<UserLoginResponse?> LoginwithGmail(LoginWithEmailRequest request)
         {
             var filter = Builders<User>.Filter
                 .Where(s=>s.authenticationInfo.email == request.email 
@@ -61,26 +61,32 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var accessToken = _tokenGenerator.GenerateAccessToken(user);
             return new UserLoginResponse(loginTicket.refreshToken, accessToken, user);
         }
-        public async Task<UserLoginResponse?> LoginwithLoginId(LoginRegisterRequest request)
+        public async Task<UserLoginResponse?> LoginwithLoginId(LoginWithLoginIdRequest request)
         {
             var filter = Builders<User>.Filter.Eq(s => s.authenticationInfo.loginId, request.loginId);
             LoginTicket loginTicket = _generateLoginTicket(request);
             var user = await _storeRefreshToken(filter, loginTicket);
-            Console.WriteLine(JsonSerializer.Serialize(user));
             if (user == null)
-            {
-                if(request.loginId == null)
-                    return null;
-                user = _mapper.Map<User>(request);
-                user.loginTickets.Add(loginTicket);
-                await _userRepository.CreateUser(user);
-            }
+                return null;
             var accessToken = _tokenGenerator.GenerateAccessToken(user);
             return new UserLoginResponse(loginTicket.refreshToken, accessToken, user);
         }
-        public async Task<UserLoginResponse?> Register(LoginRegisterRequest request)
+        public async Task<UserLoginResponse?> RegisterWithEmail(RegisterWithEmailRequest request)
         {
             if (request.email == null || request.password == null)
+                return null;
+            var user = _mapper.Map<User>(request);
+            user.loginTickets.Add(_generateLoginTicket(request));
+            user = await _userRepository.CreateUser(user);
+            if (user == null)
+                return null;
+            var refreshToken = _tokenGenerator.GenerateRefreshToken();
+            var accessToken = _tokenGenerator.GenerateAccessToken(user);
+            return new UserLoginResponse(refreshToken, accessToken, user);
+        }
+        public async Task<UserLoginResponse?> RegisterWithLoginId(RegisterWithLoginIdRequest request)
+        {
+            if (request.loginId == null)
                 return null;
             var user = _mapper.Map<User>(request);
             user.loginTickets.Add(_generateLoginTicket(request));
@@ -106,5 +112,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var password = await _userCollection.Find(s => s.id == userId).Project<string>(projection).FirstOrDefaultAsync();
             return password;
         }
+
+
     }
 }

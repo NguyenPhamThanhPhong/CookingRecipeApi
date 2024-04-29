@@ -14,6 +14,8 @@ namespace CookingRecipeApi.Configs
         public BlobContainerClient BlobContainerClient { get; set; }
         public void Initialize()
         {
+            //Console.WriteLine($"SAS token: {this.SAStoken}");
+            //Console.WriteLine($"SAS URL: {this.SASUrl}");
             this.BlobServiceClient = new BlobServiceClient(new Uri(this.SASUrl));
             this.BlobContainerClient = this.BlobServiceClient.GetBlobContainerClient(this.ContainerName);
             //Console.WriteLine(JsonSerializer.Serialize(this.BlobServiceClient));

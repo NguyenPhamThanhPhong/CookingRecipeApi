@@ -186,22 +186,16 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
                     foreach (string str in searchParams)
                     {
                         var regex = new BsonRegularExpression(new Regex(Regex.Escape(str), RegexOptions.IgnoreCase));
-                        Console.WriteLine(str);
-                        Console.WriteLine(regex);
                         subfilters.Add(Builders<Recipe>.Filter.Regex(s => s.categories, regex));
                     }
-                    //filter = filter & Builders<Recipe>.Filter.Or(subfilters);
                 }
                 else
                 {
                     foreach (string str in searchParams)
                     {
                         var regex = new BsonRegularExpression(new Regex(Regex.Escape(str), RegexOptions.IgnoreCase));
-                        Console.WriteLine(str);
-                        Console.WriteLine(regex);
                         subfilters.Add(Builders<Recipe>.Filter.Regex(s => s.categories, regex));
                     }
-                    //filter = filter & Builders<Recipe>.Filter.Or(subfilters);
                 }
             }
             return subfilters;

@@ -30,15 +30,23 @@ namespace CookingRecipeApi.Controllers
             _emailService = emailService;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] LoginRegisterRequest request)
+        [HttpPost("register-email")]
+        public async Task<IActionResult> Register([FromBody] RegisterWithEmailRequest request)
         {
-            var result = await _loginService.Register(request);
+            var result = await _loginService.RegisterWithEmail(request);
             if(result == null)
                 return BadRequest("User account info already exists");
-
             return Ok(result);
         }
+        [HttpPost("register-loginId")]
+        public async Task<IActionResult> RegisterWithLoginId([FromBody] RegisterWithLoginIdRequest request)
+        {
+            var result = await _loginService.RegisterWithLoginId(request);
+            if (result == null)
+                return BadRequest("User account info already exists");
+            return Ok(result);
+        }
+
         [Authorize]
         [HttpGet("test-login")]
         public IActionResult TestLogin()
@@ -46,11 +54,10 @@ namespace CookingRecipeApi.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userFullName = User.FindFirst(ClaimTypes.Name)?.Value;
             return Ok($"done authenticated userid={userId} & fullname={userFullName}");
-
         }
         //first time login
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRegisterRequest request)
+        [HttpPost("login-email")]
+        public async Task<IActionResult> Login([FromBody] LoginWithEmailRequest request)
         {
             if(request.email == null || request.password == null)
                 return BadRequest("Invalid request");
@@ -58,13 +65,11 @@ namespace CookingRecipeApi.Controllers
             var loginResult = await _loginService.LoginwithGmail(request);
             if(loginResult == null)
                 return BadRequest("Invalid request");
-
-
             return Ok(loginResult);
         }
         [HttpPost("login-loginId")]
         //facebook oauth login
-        public async Task<IActionResult> LoginWithFacebook([FromBody] LoginRegisterRequest request)
+        public async Task<IActionResult> LoginWithFacebook([FromBody] LoginWithLoginIdRequest request)
         {
             var result = await _loginService.LoginwithLoginId(request);
             if (result == null)
