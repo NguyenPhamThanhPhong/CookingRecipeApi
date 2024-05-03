@@ -38,20 +38,37 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             return true;
         }
 
-        public async Task<ProfileInformation> getProfilebyId(string id)
+        public async Task<UserProfileResponse> getProfilebyId(string id)
         {
             var filter = Builders<User>.Filter.Where(s => s.id == id);
-            var projection = _profileProjection;
+            var projection = 
+                Builders<User>.Projection.Expression(s => new UserProfileResponse
+                {
+                    id = s.id,
+                    createdAt = s.createdAt,
+                    profileInfo = s.profileInfo,
+                    recipeIds = s.recipeIds,
+                    followerIds = s.followerIds,
+                    followingIds = s.followingIds
+                });
             var profile = await _userCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
             return profile;
         }
 
-        public async Task<IEnumerable<ProfileInformation>> getProfileSearch(string search,int skip)
+        public async Task<IEnumerable<UserProfileResponse>> getProfileSearch(string search,int skip)
         {
             string cleanSearch = Regex.Replace(search, "[^a-zA-Z0-9]", "");
             var regexPattern = new BsonRegularExpression(Regex.Escape(cleanSearch), "i");
             var filter = Builders<User>.Filter.Regex(s => s.profileInfo.fullName, regexPattern);
-            var projection = _profileProjection;
+            var projection = Builders<User>.Projection.Expression(s => new UserProfileResponse
+            {
+                id = s.id,
+                createdAt = s.createdAt,
+                profileInfo = s.profileInfo,
+                recipeIds = s.recipeIds,
+                followerIds = s.followerIds,
+                followingIds = s.followingIds
+            });
             var profiles = await _userCollection.Find(filter).Skip(skip).Limit(20).Project(projection).ToListAsync();
             return profiles;
         }

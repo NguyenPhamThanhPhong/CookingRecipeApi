@@ -31,7 +31,7 @@ namespace CookingRecipeApi.Controllers
         }
 
         [HttpPost("register-email")]
-        public async Task<IActionResult> Register([FromBody] RegisterWithEmailRequest request)
+        public async Task<IActionResult> Register([FromForm] RegisterWithEmailRequest request)
         {
             var result = await _loginService.RegisterWithEmail(request);
             if(result == null)
@@ -39,7 +39,7 @@ namespace CookingRecipeApi.Controllers
             return Ok(result);
         }
         [HttpPost("register-loginId")]
-        public async Task<IActionResult> RegisterWithLoginId([FromBody] RegisterWithLoginIdRequest request)
+        public async Task<IActionResult> RegisterWithLoginId([FromForm] RegisterWithLoginIdRequest request)
         {
             var result = await _loginService.RegisterWithLoginId(request);
             if (result == null)

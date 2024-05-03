@@ -45,6 +45,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         }
         private LoginTicket _generateLoginTicket(LoginRegisterRequestBase request)
         {
+            Console.WriteLine($"request is: {JsonSerializer.Serialize(request)}");
             LoginTicket loginTicket = _mapper.Map<LoginTicket>(request);
             loginTicket.refreshToken = _tokenGenerator.GenerateRefreshToken();
             return loginTicket;
