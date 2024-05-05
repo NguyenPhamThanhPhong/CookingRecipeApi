@@ -48,8 +48,8 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
                     createdAt = s.createdAt,
                     profileInfo = s.profileInfo,
                     recipeIds = s.recipeIds,
-                    followerIds = s.followerIds,
-                    followingIds = s.followingIds
+                    followingCount = s.followingIds.Count,
+                    followerCount = s.followerIds.Count
                 });
             var profile = await _userCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
             return profile;
@@ -66,8 +66,8 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
                 createdAt = s.createdAt,
                 profileInfo = s.profileInfo,
                 recipeIds = s.recipeIds,
-                followerIds = s.followerIds,
-                followingIds = s.followingIds
+                followingCount = s.followingIds.Count,
+                followerCount = s.followerIds.Count
             });
             var profiles = await _userCollection.Find(filter).Skip(skip).Limit(20).Project(projection).ToListAsync();
             return profiles;

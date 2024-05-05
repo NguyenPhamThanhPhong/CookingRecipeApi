@@ -30,6 +30,10 @@ namespace CookingRecipeApi.Configs
                 {
                     fullName = src.fullName ?? "",
                     bio = src.bio ?? "",
+                    avatarUrl = src.avatarUrl ?? "",
+                    categories = src.categories ?? new List<string>(),
+                    hungryHeads = src.hungryHeads,
+                    isVegan = src.isVegan,
                 }));
 
             CreateMap<RegisterWithLoginIdRequest, User>()
@@ -42,9 +46,12 @@ namespace CookingRecipeApi.Configs
                 .ForMember(dest => dest.profileInfo,
                 opt => opt.MapFrom(src => new ProfileInformation
                 {
-                    fullName = src.fullName??"",
-                    avatarUrl = src.fileUrl ?? "",
+                    fullName = src.fullName ?? "",
                     bio = src.bio ?? "",
+                    avatarUrl = src.avatarUrl ?? "",
+                    categories = src.categories ?? new List<string>(),
+                    hungryHeads = src.hungryHeads,
+                    isVegan = src.isVegan,
                 }));
 
             CreateMap<RecipeCreateRequest, Recipe>();

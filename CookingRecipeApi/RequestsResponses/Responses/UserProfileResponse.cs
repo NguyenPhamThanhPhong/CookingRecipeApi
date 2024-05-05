@@ -8,8 +8,8 @@ namespace CookingRecipeApi.RequestsResponses.Responses
         public string id { get; set; }
         public DateTime createdAt { get; set; } = DateTime.Now;
         public List<string> recipeIds { get; set; }
-        public List<string> followingIds { get; set; }
-        public List<string> followerIds { get; set; }
+        public int followingCount { get; set; }
+        public int followerCount { get; set; }
         public ProfileInformation profileInfo { get; set; }
 
         public UserProfileResponse()
@@ -18,8 +18,8 @@ namespace CookingRecipeApi.RequestsResponses.Responses
             this.createdAt = DateTime.UtcNow;
             this.profileInfo = new ProfileInformation();
             this.recipeIds = new List<string>();
-            this.followingIds = new List<string>();
-            this.followerIds = new List<string>();
+            followerCount = 0;
+            followingCount = 0;
         }
 
     }
