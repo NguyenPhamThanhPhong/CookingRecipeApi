@@ -114,6 +114,14 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             return password;
         }
 
-
+        public async Task<bool> VerifyLogin(string email)
+        {
+            var projection = Builders<User>.Projection.Include(x => x.id);
+            var filter = Builders<User>.Filter.Where(s => s.authenticationInfo.email == email);
+            var user = await _userCollection.Find(filter).Project<User>(projection).FirstOrDefaultAsync();
+            if (user == null)
+                return true;
+            return false;
+        }
     }
 }

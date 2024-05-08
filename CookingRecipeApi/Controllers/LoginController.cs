@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 
 namespace CookingRecipeApi.Controllers
@@ -54,6 +55,16 @@ namespace CookingRecipeApi.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userFullName = User.FindFirst(ClaimTypes.Name)?.Value;
             return Ok($"done authenticated userid={userId} & fullname={userFullName}");
+        }
+        [HttpPost("verify-login")]
+        public async Task<IActionResult> VerifyLogin()
+        {
+            using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                string email = await reader.ReadToEndAsync();
+                var result = await _loginService.VerifyLogin(email);
+                return result ? Ok("not yet exist"): BadRequest("existed") ;
+            }
         }
         //first time login
         [HttpPost("login-email")]

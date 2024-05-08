@@ -1,5 +1,6 @@
 using CookingRecipeApi;
 using CookingRecipeApi.Configs;
+using CookingRecipeApi.Helper;
 using CookingRecipeApi.Hubs;
 using CookingRecipeApi.Services.RabbitMQServices;
 using Microsoft.IdentityModel.Logging;
@@ -40,6 +41,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.UseCors();
 

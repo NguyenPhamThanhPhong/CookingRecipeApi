@@ -6,6 +6,7 @@ namespace CookingRecipeApi.Services.BusinessServices.IServicies
 {
     public interface ILoginService
     {
+        public Task<bool> VerifyLogin(string email);
         public Task<UserLoginResponse?> LoginwithGmail(LoginWithEmailRequest request);
         public Task<UserLoginResponse?> LoginwithLoginId(LoginWithLoginIdRequest request);
         public Task<UserLoginResponse?> RegisterWithEmail(RegisterWithEmailRequest request);
