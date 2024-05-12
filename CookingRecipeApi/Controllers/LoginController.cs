@@ -92,9 +92,9 @@ namespace CookingRecipeApi.Controllers
         public async Task<IActionResult> GetAccessToken([FromBody] string refreshToken)
         {
             var user = await _loginService.GetUserfromRefreshToken(refreshToken);
-            Console.WriteLine(JsonSerializer.Serialize(user));
-            Console.WriteLine(refreshToken);
-            if(user == null)
+            //Console.WriteLine(JsonSerializer.Serialize(user));
+            //Console.WriteLine(refreshToken);
+            if (user == null)
                 return BadRequest("Invalid request");
             var accessToken = _tokenGenerator.GenerateAccessToken(user);
             return Ok(accessToken);

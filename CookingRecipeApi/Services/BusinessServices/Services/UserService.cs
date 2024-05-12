@@ -55,7 +55,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             return profile;
         }
 
-        public async Task<IEnumerable<UserProfileResponse>> getProfileSearch(string search,int skip)
+        public async Task<IEnumerable<UserProfileResponse>> getProfileSearch(string search,int page)
         {
             string cleanSearch = Regex.Replace(search, "[^a-zA-Z0-9]", "");
             var regexPattern = new BsonRegularExpression(Regex.Escape(cleanSearch), "i");
@@ -69,7 +69,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
                 followingCount = s.followingIds.Count,
                 followerCount = s.followerIds.Count
             });
-            var profiles = await _userCollection.Find(filter).Skip(skip).Limit(20).Project(projection).ToListAsync();
+            var profiles = await _userCollection.Find(filter).Skip(page).Limit(20).Project(projection).ToListAsync();
             return profiles;
         }
 

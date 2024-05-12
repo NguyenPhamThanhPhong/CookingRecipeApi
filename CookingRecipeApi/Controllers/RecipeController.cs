@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Swashbuckle.AspNetCore.Annotations;
 using CookingRecipeApi.RequestsResponses.Requests.RecipeRequests;
+using CookingRecipeApi.Models;
 
 namespace CookingRecipeApi.Controllers
 {
@@ -33,23 +34,50 @@ namespace CookingRecipeApi.Controllers
                 return NotFound("recipe not found in database");
             return Ok(recipe);
         }
-        [HttpPost("get-from-ids")]
-        public async Task<IActionResult> GetMany([FromBody] IEnumerable<string> recipeIds)
+        [HttpGet("get-from-likes")]
+        public async Task<IActionResult> GetFeedRecipeFromLike()
+        {
+            var recipes = await _recipeService.GetRecipesFromLikes();
+            return Ok(recipes);
+        }
+        [HttpGet("get-from-ids")]
+        public async Task<IActionResult> GetMany([FromQuery] IEnumerable<string> recipeIds)
         {
             var recipes = await _recipeService
                 .GetRecipesFromIds(recipeIds);
             return Ok(recipes);
         }
         [Authorize]
-        [HttpPost("get-saved-recipes/{page}")]
-        public async Task<IActionResult> GetSavedRecipes([FromBody]GetRecipeSearchRequest request,int page)
+        [HttpGet("get-saved-recipes")]
+        public async Task<IActionResult> GetSavedRecipes([FromQuery] List<string> categories, [FromQuery] string? searchTerm, [FromQuery] int page)
         {
             if (!ModelState.IsValid)
                 return BadRequest("request invalid");
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userID == null)
                 return Unauthorized("userId not found in token");
+            GetRecipeSearchRequest request = new GetRecipeSearchRequest() { categories = categories, searchTerm = searchTerm ?? "" };
             var recipes =  await _recipeService.GetRecipesSaved(userID, request,page);
+            return Ok(recipes);
+        }
+        [Authorize]
+        [HttpGet("get-liked-recipes")]
+        public async Task<IActionResult> GetLikedRecipes([FromQuery] List<string> categories, [FromQuery] string? searchTerm, [FromQuery] int page)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("request invalid");
+            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userID == null)
+                return Unauthorized("userId not found in token");
+            GetRecipeSearchRequest request = new GetRecipeSearchRequest() { categories = categories, searchTerm = searchTerm ?? "" };
+            var recipes = await _recipeService.GetRecipesLiked(userID, request, page);
+            return Ok(recipes);
+        }
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchbyCategory([FromQuery] List<string> categories, [FromQuery] string? searchTerm, [FromQuery] int page)
+        {
+            GetRecipeSearchRequest request = new GetRecipeSearchRequest() { categories = categories, searchTerm = searchTerm ?? "" };
+            var recipes = await _recipeService.GetRecipesSearch(request, page);
             return Ok(recipes);
         }
         [Authorize]
@@ -71,11 +99,27 @@ namespace CookingRecipeApi.Controllers
             await _recipeService.NotifyRecipe(userID, name, recipe,RecipeNotificationType.Creation);
             return Ok(recipe);
         }
-        [HttpPost("search/{page}")]
-        public async Task<IActionResult> SearchbyCategory(GetRecipeSearchRequest request,int page) 
+        [Authorize]
+        [HttpPut("save-recipe/{recipeId}")]
+        public async Task<IActionResult> SaveRecipe(string recipeId)
         {
-            var recipes = await _recipeService.GetRecipesSearch(request,page);
-            return Ok(recipes);
+            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userID == null)
+                return Unauthorized();
+
+            var result = await _recipeService.SaveRecipe(userID, recipeId);
+            return result ? Ok() : BadRequest();
+        }
+        [Authorize]
+        [HttpPut("like-recipe/{recipeId}")]
+        public async Task<IActionResult> LikeRecipe(string recipeId)
+        {
+            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userID == null)
+                return Unauthorized();
+
+            var result = await _recipeService.LikeRecipe(userID, recipeId);
+            return result ? Ok() : BadRequest();
         }
         [Authorize]
         [HttpPut("update")]
@@ -87,30 +131,13 @@ namespace CookingRecipeApi.Controllers
             var name = User.FindFirst(ClaimTypes.Name)?.Value;
             if (userID == null || name == null)
                 return Unauthorized();
-            var recipe = await _recipeService.UpdateRecipe(request, userID);
+            Recipe? recipe = await _recipeService.UpdateRecipe(request, userID);
             if (recipe == null)
                 return BadRequest("request invalid");
             await _recipeService.NotifyRecipe(userID, name, recipe, RecipeNotificationType.Update);
             return Ok(recipe);
         }
-        [Authorize]
-        [HttpPost("save-recipe/{recipeId}")]
-        public async Task<IActionResult> SaveRecipe(string recipeId)
-        {
-            Console.WriteLine(recipeId);
-            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userID == null)
-                return Unauthorized();
 
-            var result = await _recipeService.SaveRecipe(userID,recipeId);
-            return result ? Ok() : BadRequest();
-        }
-        [HttpGet("get-from-likes")]
-        public async Task<IActionResult> GetFeedRecipeFromLike()
-        {
-            var recipes = await _recipeService.GetRecipesFromLikes();
-            return Ok(recipes);
-        }
         [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRecipe(string id)

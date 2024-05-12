@@ -125,7 +125,18 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             return _userCollection.UpdateOneAsync(s => s.id == userId, update)
                 .ContinueWith(s => s.Result.ModifiedCount > 0);
         }
-
+        public async Task<bool> LikeRecipe(string userId, string recipeId)
+        {
+            var update = Builders<User>.Update.Push(s => s.likedRecipeIds, recipeId);
+            var updateResult = await _userCollection.UpdateOneAsync(s => s.id == userId, update);
+            if (updateResult.ModifiedCount > 0)
+            {
+                var updateRecipe = Builders<Recipe>.Update.Inc(s => s.likes, 1);
+                var updateRecipeResult = await _recipeCollection.UpdateOneAsync(s => s.id == recipeId, updateRecipe);
+                return updateRecipeResult.ModifiedCount > 0;
+            }
+            return false;
+        }
         public async Task<IEnumerable<Recipe>> GetRecipesSearch(GetRecipeSearchRequest request, int page)
         {
             var searchTerm = request.searchTerm;
@@ -176,6 +187,31 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             return await _recipeCollection
                 .Find(filter).Skip(page * 10).Limit(10).ToListAsync();
         }
+
+        public async Task<IEnumerable<Recipe>> GetRecipesLiked(string userId, GetRecipeSearchRequest request, int page)
+        {
+            var searchTerm = request.searchTerm;
+            var categoriesList = request.categories;
+            string pattern = @"[.,!?;'\s]+";
+            var searchParams = Regex.Split(searchTerm, pattern)
+                .Where(s => s.Length > 0).ToArray();
+            var likedRecipeIds = _userCollection.Find(s => s.id == userId)
+                .Project(s => s.likedRecipeIds).FirstOrDefault();
+            var filter = Builders<Recipe>.Filter.In(s => s.id, likedRecipeIds);
+            if (searchParams.Length > 0)
+            {
+                var orFilter = Builders<Recipe>.Filter.Or(
+                                       ChainingSearchFilter(searchParams, FilterChainType.Or));
+                filter = Builders<Recipe>.Filter.Or(filter, orFilter);
+            }
+            if (categoriesList.Count() > 0)
+            {
+                var andFilter = Builders<Recipe>.Filter.And(
+                                       ChainingSearchFilter(categoriesList, FilterChainType.And));
+                filter = Builders<Recipe>.Filter.And(filter, andFilter);
+            }
+            return await _recipeCollection.Find(filter).Skip(page * 10).Limit(10).ToListAsync();
+        }
         private List<FilterDefinition<Recipe>> ChainingSearchFilter(IEnumerable<string> searchParams, FilterChainType chainType)
         {
             List<FilterDefinition<Recipe>> subfilters = new List<FilterDefinition<Recipe>>();
@@ -200,6 +236,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             }
             return subfilters;
         }
+
     }
     public enum RecipeNotificationType
     {

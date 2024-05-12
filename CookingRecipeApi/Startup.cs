@@ -172,10 +172,15 @@ namespace CookingRecipeApi
         }
         public static IServiceCollection ConfigControllers(this IServiceCollection services)
         {
-            services.AddControllers().AddJsonOptions(options =>
+            services.AddControllers(options =>
+            {
+                options.InputFormatters.Insert(0, new PlainTextConverter());
+            })
+            .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new TimeSpanConverter());
             });
+
             // add model binder
             services.AddMvc(options =>
             {

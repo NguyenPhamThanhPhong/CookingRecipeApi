@@ -8,7 +8,7 @@ namespace CookingRecipeApi.Services.BusinessServices.IServicies
     {
         Task<UserProfileResponse> getProfilebyId(string id);
         Task<User?> getSelf(string id);
-        Task<IEnumerable<UserProfileResponse>> getProfileSearch(string search, int skip);
+        Task<IEnumerable<UserProfileResponse>> getProfileSearch(string search, int page);
         Task<ProfileInformation> UpdateProfileBasicbyId(UserUpdateRequest request, string userId);
         Task<ProfileInformation> UpdateProfileOptionalbyId(UserUpdateProfileOptional request, string userId);
         Task<bool> DeleteUser(string id);

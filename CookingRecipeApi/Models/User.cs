@@ -17,6 +17,7 @@ namespace CookingRecipeApi.Models
             this.followingIds = new List<string>();
             this.followerIds = new List<string>();
             this.loginTickets = new List<LoginTicket>();
+            this.likedRecipeIds = new List<string>();
         }
 
         [BsonId]
@@ -30,6 +31,7 @@ namespace CookingRecipeApi.Models
         public List<string> savedRecipeIds { get; set; }
         public List<string> followingIds { get; set; }
         public List<string> followerIds { get; set; }
+        public List<string> likedRecipeIds { get; set; }
         public List<LoginTicket> loginTickets { get; set; }
     }
 

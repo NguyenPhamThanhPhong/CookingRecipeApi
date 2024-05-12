@@ -1,5 +1,6 @@
 ﻿using CookingRecipeApi.Models;
 using CookingRecipeApi.RequestsResponses.Requests.UserRequests;
+using CookingRecipeApi.RequestsResponses.Responses;
 using CookingRecipeApi.Services.AzureBlobServices;
 using CookingRecipeApi.Services.BusinessServices.IServicies;
 using Microsoft.AspNetCore.Authorization;
@@ -30,7 +31,7 @@ namespace CookingRecipeApi.Controllers
         }
         [Authorize]
         [HttpGet()]
-        public async Task<IActionResult> GetSelf()
+        public async Task<IActionResult> GetSelfInfo()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
@@ -39,6 +40,18 @@ namespace CookingRecipeApi.Controllers
             return Ok(user);
 
         }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProfilebyId(string id)
+        {
+            UserProfileResponse profile = await _userService.getProfilebyId(id);
+            return Ok(profile);
+        }
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string? searchTerm, [FromQuery] int page)
+        {
+            IEnumerable<UserProfileResponse> profiles = await _userService.getProfileSearch(searchTerm??"", page);
+            return Ok(profiles);
+        }
         [Authorize]
         [HttpPut("update-profile")]
         public async Task<IActionResult> UpdateProfile([FromForm]UserUpdateRequest request)
@@ -46,26 +59,10 @@ namespace CookingRecipeApi.Controllers
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userID == null)
                 return Unauthorized("");
-            var result = await _userService.UpdateProfileBasicbyId(request, userID);
-            return Ok(result);
-        }
-        [Authorize]
-        [HttpPut("update-profile-optional")]
-        public async Task<IActionResult> UpdateProfileOptional([FromForm] UserUpdateProfileOptional request)
-        {
-            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userID == null)
-                return Unauthorized("");
-            var result = await _userService.UpdateProfileOptionalbyId(request, userID);
+            ProfileInformation result = await _userService.UpdateProfileBasicbyId(request, userID);
             return Ok(result);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetProfile(string id)
-        {
-            var profile = await _userService.getProfilebyId(id);
-            return Ok(profile);
-        }
         [Authorize]
         [HttpDelete("")]
         public async Task<IActionResult> DeleteUser()
@@ -86,12 +83,7 @@ namespace CookingRecipeApi.Controllers
             var result = await _userService.UpdatePassword(userID, password);
             return Ok(result);
         }
-        [HttpGet("search/{search}/{skip}")]
-        public async Task<IActionResult> Search(string search, int skip)
-        {
-            var profiles = await _userService.getProfileSearch(search,skip);
-            return Ok(profiles);
-        }
+
         [Authorize]
         [HttpPut("follow/{id}")]
         public async Task<IActionResult> Follow(string id,bool option)
@@ -106,3 +98,13 @@ namespace CookingRecipeApi.Controllers
 
     }
 }
+//[Authorize]
+//[HttpPut("update-profile-optional")]
+//public async Task<IActionResult> UpdateProfileOptional([FromForm] UserUpdateProfileOptional request)
+//{
+//    var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+//    if (userID == null)
+//        return Unauthorized("");
+//    var result = await _userService.UpdateProfileOptionalbyId(request, userID);
+//    return Ok(result);
+//}
