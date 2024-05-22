@@ -107,18 +107,17 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var user = await _userCollection.Find(filter).FirstOrDefaultAsync();
             return user;
         }
-        public async Task<string?> GetUserPassword(string userId)
+        public async Task<string?> GetUserPassword(string email)
         {
-            var projection = Builders<User>.Projection.Include(x => x.authenticationInfo.password);
-            var password = await _userCollection.Find(s => s.id == userId).Project<string>(projection).FirstOrDefaultAsync();
+            var password = await _userCollection.Find(s => s.authenticationInfo.email == email)
+                .Project(x=>x.authenticationInfo.password).FirstOrDefaultAsync();
             return password;
         }
 
         public async Task<bool> VerifyLogin(string email)
         {
-            var projection = Builders<User>.Projection.Include(x => x.id);
             var filter = Builders<User>.Filter.Where(s => s.authenticationInfo.email == email);
-            var user = await _userCollection.Find(filter).Project<User>(projection).FirstOrDefaultAsync();
+            var user = await _userCollection.Find(filter).Project(x=>x.id).FirstOrDefaultAsync();
             if (user == null)
                 return true;
             return false;

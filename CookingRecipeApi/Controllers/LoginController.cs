@@ -100,19 +100,19 @@ namespace CookingRecipeApi.Controllers
             return Ok(accessToken);
         }
         [HttpPost("forgot-password")]
-        // lấy userId ra từ token, gửi mail cái mật khẩu
+        //  gửi mail cái mật khẩu
         public async Task<IActionResult> ForgotPassword(string email)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            if (userId == null || userEmail == null)
+            if (email == null)
                 return BadRequest("Invalid request");
-            var password = await _loginService.GetUserPassword(userId);
+            string? password = await _loginService.GetUserPassword(email);
+            if (password == null)
+                return BadRequest("Invalid email");
             //send mail
-            var result = await _emailService.SendEmail(userEmail, 
+            var result = await _emailService.SendEmail(email, 
                 "Cooking recipe social media: your password is", 
-                $"Your password is: ${password??""} ");
-            return result ? Ok("Email sent") : BadRequest("Email not sent");
+                $"Your password is: {password??""} ");
+            return result ? Ok() : BadRequest("Email not sent");
         }
 
     }

@@ -9,6 +9,8 @@ namespace CookingRecipeApi.RequestsResponses.Requests.UserRequests
         [StringLength(50, MinimumLength = 1)]
         public string fullName { get; set; }
         public string? avatarUrl { get; set; }
+        public string googleLink { get; set; }
+        public string facebookLink { get; set; }
         public IFormFile? avatarImg { get; set; }
         public bool? isVegan { get; set; }
         public string? bio { get; set; }
@@ -17,6 +19,8 @@ namespace CookingRecipeApi.RequestsResponses.Requests.UserRequests
         public UserUpdateRequest()
         {
             fullName = string.Empty;
+            googleLink = string.Empty;
+            facebookLink = string.Empty;
             categories = new List<string>();
             avatarUrl = string.Empty;
             isVegan = false;

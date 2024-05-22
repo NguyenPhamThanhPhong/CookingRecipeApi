@@ -47,7 +47,6 @@ namespace CookingRecipeApi.Models
         [BsonIgnoreIfNull]
         public string? linkedAccountType { get; set; }
 
-
     }
     [BsonIgnoreExtraElements]
 
@@ -55,12 +54,16 @@ namespace CookingRecipeApi.Models
     {
         public string fullName { get; set; }
         public string avatarUrl { get; set; }
+        public string googleLink { get; set; }
+        public string facebookLink { get; set; }
         public bool isVegan { get; set; }
         public string bio { get; set; }
         public List<string> categories { get; set; }
         public int hungryHeads { get; set; }
         public ProfileInformation()
         {
+            googleLink = string.Empty;
+            facebookLink = string.Empty;
             this.fullName = string.Empty;
             this.avatarUrl = string.Empty;
             this.isVegan = false;

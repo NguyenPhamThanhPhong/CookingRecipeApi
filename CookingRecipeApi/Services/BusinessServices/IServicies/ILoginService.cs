@@ -12,6 +12,6 @@ namespace CookingRecipeApi.Services.BusinessServices.IServicies
         public Task<UserLoginResponse?> RegisterWithEmail(RegisterWithEmailRequest request);
         public Task<UserLoginResponse?> RegisterWithLoginId(RegisterWithLoginIdRequest request);
         public Task<User?> GetUserfromRefreshToken(string refreshToken);
-        public Task<string?> GetUserPassword(string id);
+        public Task<string?> GetUserPassword(string email);
     }
 }
