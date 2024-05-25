@@ -9,8 +9,8 @@ namespace CookingRecipeApi.RequestsResponses.Requests.UserRequests
         [StringLength(50, MinimumLength = 1)]
         public string fullName { get; set; }
         public string? avatarUrl { get; set; }
-        public string googleLink { get; set; }
-        public string facebookLink { get; set; }
+        public string? googleLink { get; set; }
+        public string? facebookLink { get; set; }
         public IFormFile? avatarImg { get; set; }
         public bool? isVegan { get; set; }
         public string? bio { get; set; }
@@ -18,6 +18,7 @@ namespace CookingRecipeApi.RequestsResponses.Requests.UserRequests
         public int hungryHeads { get; set; }
         public UserUpdateRequest()
         {
+            Console.WriteLine("request created");
             fullName = string.Empty;
             googleLink = string.Empty;
             facebookLink = string.Empty;
