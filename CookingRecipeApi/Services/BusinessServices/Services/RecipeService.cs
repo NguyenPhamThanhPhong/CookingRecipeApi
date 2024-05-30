@@ -120,23 +120,59 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var recipes = await _recipeCollection.Find(s => true).Sort(sort).Limit(10).ToListAsync();
             return recipes;
         }
-        public  Task<bool> SaveRecipe(string userId,string recipeId)
+        public async Task<bool> SaveRecipe(string userId,string recipeId,bool option)
         {
-            var update = Builders<User>.Update.Push(s => s.savedRecipeIds, recipeId);
-            return _userCollection.UpdateOneAsync(s => s.id == userId, update)
-                .ContinueWith(s => s.Result.ModifiedCount > 0);
-        }
-        public async Task<bool> LikeRecipe(string userId, string recipeId)
-        {
-            var update = Builders<User>.Update.Push(s => s.likedRecipeIds, recipeId);
-            var updateResult = await _userCollection.UpdateOneAsync(s => s.id == userId, update);
-            if (updateResult.ModifiedCount > 0)
+            try
             {
-                var updateRecipe = Builders<Recipe>.Update.Inc(s => s.likes, 1);
-                var updateRecipeResult = await _recipeCollection.UpdateOneAsync(s => s.id == recipeId, updateRecipe);
-                return updateRecipeResult.ModifiedCount > 0;
+                if (option)
+                {
+                    var pullUpdate = Builders<User>.Update.Pull(s => s.savedRecipeIds, recipeId);
+
+                    var update = Builders<User>.Update.Push(s => s.savedRecipeIds, recipeId);
+
+                    await _userCollection.UpdateOneAsync(s => s.id == userId, pullUpdate);
+                    var updateResult = await _userCollection.UpdateOneAsync(s => s.id == userId, update);
+                    return updateResult.ModifiedCount > 0;
+                }
+                else
+                {
+                    var update = Builders<User>.Update.Pull(s => s.savedRecipeIds, recipeId);
+                    var updateResult = await _userCollection.UpdateOneAsync(s => s.id == userId, update);
+                    return updateResult.ModifiedCount > 0;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+        }
+        public async Task<bool> LikeRecipe(string userId, string recipeId,bool option)
+        {
+            try
+            {
+                if (option)
+                {
+                    var pullUpdate = Builders<User>.Update.Pull(s => s.likedRecipeIds, recipeId);
+
+                    var update = Builders<User>.Update.Push(s => s.likedRecipeIds, recipeId);
+
+                    await _userCollection.UpdateOneAsync(s => s.id == userId, pullUpdate);
+                    var updateResult = await _userCollection.UpdateOneAsync(s => s.id == userId, update);
+                    return updateResult.ModifiedCount > 0;
+                }
+                else
+                {
+                    var update = Builders<User>.Update.Pull(s => s.likedRecipeIds, recipeId);
+                    var updateResult = await _userCollection.UpdateOneAsync(s => s.id == userId, update);
+                    return updateResult.ModifiedCount > 0;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
         }
         public async Task<IEnumerable<Recipe>> GetRecipesSearch(GetRecipeSearchRequest request, int page)
         {

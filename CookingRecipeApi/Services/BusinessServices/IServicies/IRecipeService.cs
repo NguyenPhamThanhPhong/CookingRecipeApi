@@ -17,7 +17,7 @@ namespace CookingRecipeApi.Services.BusinessServices.IServicies
         Task<bool> DeleteRecipe(string id, string userId);
         Task NotifyRecipe(string userId, string userfullName, Recipe recipe, RecipeNotificationType type);
         Task<IEnumerable<Recipe>> GetRecipesFromLikes();
-        Task<bool> SaveRecipe(string userId, string recipeId);
-        Task<bool> LikeRecipe(string userId, string recipeId);
+        Task<bool> SaveRecipe(string userId, string recipeId,bool option);
+        Task<bool> LikeRecipe(string userId, string recipeId, bool option);
     }
 }

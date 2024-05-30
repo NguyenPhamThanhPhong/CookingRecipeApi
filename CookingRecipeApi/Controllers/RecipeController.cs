@@ -101,24 +101,24 @@ namespace CookingRecipeApi.Controllers
         }
         [Authorize]
         [HttpPut("save-recipe/{recipeId}")]
-        public async Task<IActionResult> SaveRecipe(string recipeId)
+        public async Task<IActionResult> SaveRecipe(string recipeId, [FromQuery] bool option)
         {
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userID == null)
                 return Unauthorized();
 
-            var result = await _recipeService.SaveRecipe(userID, recipeId);
+            var result = await _recipeService.SaveRecipe(userID, recipeId,option);
             return result ? Ok() : BadRequest();
         }
         [Authorize]
         [HttpPut("like-recipe/{recipeId}")]
-        public async Task<IActionResult> LikeRecipe(string recipeId)
+        public async Task<IActionResult> LikeRecipe(string recipeId, [FromQuery] bool option)
         {
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userID == null)
                 return Unauthorized();
 
-            var result = await _recipeService.LikeRecipe(userID, recipeId);
+            var result = await _recipeService.LikeRecipe(userID, recipeId, option);
             return result ? Ok() : BadRequest();
         }
         [Authorize]
