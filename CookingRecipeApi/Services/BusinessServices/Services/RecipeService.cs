@@ -20,21 +20,18 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         private readonly IRecipeRepository _recipeRepository;
         private readonly IMongoCollection<Recipe> _recipeCollection;
         private readonly IMongoCollection<User> _userCollection;
-        private readonly ClientConstants _clientConstants;
         private readonly AzureBlobHandler _azureBlobHandler;
         private readonly NotificationTaskProducer _notificationTaskProducer;
         private readonly IMapper _mapper;
 
         public RecipeService(IRecipeRepository recipeRepository, DatabaseConfigs databaseConfigs,
-            AzureBlobHandler azureBlobHandler, IMapper mapper, 
-            ClientConstants clientConstants, NotificationTaskProducer notificationTaskProducer)
+            AzureBlobHandler azureBlobHandler, IMapper mapper,  NotificationTaskProducer notificationTaskProducer)
         {
             _recipeRepository = recipeRepository;
             _recipeCollection = databaseConfigs.RecipeCollection;
             _userCollection = databaseConfigs.UserCollection;
             _azureBlobHandler = azureBlobHandler;
             _mapper = mapper;
-            _clientConstants = clientConstants;
             _notificationTaskProducer = notificationTaskProducer;
         }
         public async Task<Recipe?> CreateRecipe(RecipeCreateRequest request, string userID)
@@ -65,10 +62,6 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         }
         public async Task<Recipe?> UpdateRecipe(RecipeUpdateRequest request, string userID)
         {
-            //Chỉnh lại Recipe repository để có filter AND(userId, recipeId) 
-            //để tránh trường hợp người dùng khác sửa recipe của người khác
-            // b1. kiểm tra token match với userId trong recipe
-            // b2. query thông qua cái AND ở trên
             var recipe = _mapper.Map<Recipe>(request);
             if (request.files != null && request.files.Count()>0)
             {
@@ -122,57 +115,11 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         }
         public async Task<bool> SaveRecipe(string userId,string recipeId,bool option)
         {
-            try
-            {
-                if (option)
-                {
-                    var pullUpdate = Builders<User>.Update.Pull(s => s.savedRecipeIds, recipeId);
-
-                    var update = Builders<User>.Update.Push(s => s.savedRecipeIds, recipeId);
-
-                    await _userCollection.UpdateOneAsync(s => s.id == userId, pullUpdate);
-                    var updateResult = await _userCollection.UpdateOneAsync(s => s.id == userId, update);
-                    return updateResult.ModifiedCount > 0;
-                }
-                else
-                {
-                    var update = Builders<User>.Update.Pull(s => s.savedRecipeIds, recipeId);
-                    var updateResult = await _userCollection.UpdateOneAsync(s => s.id == userId, update);
-                    return updateResult.ModifiedCount > 0;
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return false;
-            }
+            return await _recipeRepository.SaveRecipe(userId, recipeId, option);
         }
         public async Task<bool> LikeRecipe(string userId, string recipeId,bool option)
         {
-            try
-            {
-                if (option)
-                {
-                    var pullUpdate = Builders<User>.Update.Pull(s => s.likedRecipeIds, recipeId);
-
-                    var update = Builders<User>.Update.Push(s => s.likedRecipeIds, recipeId);
-
-                    await _userCollection.UpdateOneAsync(s => s.id == userId, pullUpdate);
-                    var updateResult = await _userCollection.UpdateOneAsync(s => s.id == userId, update);
-                    return updateResult.ModifiedCount > 0;
-                }
-                else
-                {
-                    var update = Builders<User>.Update.Pull(s => s.likedRecipeIds, recipeId);
-                    var updateResult = await _userCollection.UpdateOneAsync(s => s.id == userId, update);
-                    return updateResult.ModifiedCount > 0;
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return false;
-            }
+            return await _recipeRepository.LikeRecipe(userId, recipeId, option);
         }
         public async Task<IEnumerable<Recipe>> GetRecipesSearch(GetRecipeSearchRequest request, int page)
         {
@@ -180,106 +127,51 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var categoriesList = request.categories;
             var searchParams = StrUtils.SplitSpecialCharacters(searchTerm);
             var filter = Builders<Recipe>.Filter.Empty;
-
-            if(searchParams.Length>0)
-            {
-                var orFilter = Builders<Recipe>.Filter.Or(
-                    ChainingSearchFilter(searchParams, FilterChainType.Or));
-                filter = Builders<Recipe>.Filter.Or(filter, orFilter);
-            }
-            if(categoriesList.Count()>0)
-            {
-                var andFilter = Builders<Recipe>.Filter.And(
-                    ChainingSearchFilter(categoriesList, FilterChainType.And));
-                filter = Builders<Recipe>.Filter.And(filter, andFilter);
-            }
-
-            var sort = Builders<Recipe>.Sort.Descending(s => s.likes)/*.Descending(s=>s.createdAt);*/;
-            return await _recipeCollection.Find(filter)
-                .Sort(sort).Skip(page * 10).Limit(10).ToListAsync();
+            return await _recipeRepository.GetRecipesSearch(filter, searchParams, categoriesList, page);
         }
 
         public async Task<IEnumerable<Recipe>> GetRecipesSaved(string userId, GetRecipeSearchRequest request, int page)
         {
             var searchTerm = request.searchTerm;
             var categoriesList = request.categories;
-            string pattern = @"[.,!?;'\s]+";
-            var searchParams = Regex.Split(searchTerm,pattern)
-                .Where(s => s.Length > 0).ToArray();
-            var savedRecipeIds= await _userCollection.Find(s => s.id == userId)
+            var searchParams = StrUtils.SplitSpecialCharacters(searchTerm);
+            var savedRecipeIds = await _userCollection.Find(s => s.id == userId)
                 .Project(s => s.savedRecipeIds).FirstOrDefaultAsync();
             if(!savedRecipeIds.IsNullOrEmpty())
             {
                 var filter = Builders<Recipe>.Filter.In(s => s.id, savedRecipeIds);
-                if (searchParams.Length > 0)
-                {
-                    var orFilter = Builders<Recipe>.Filter.Or(
-                        ChainingSearchFilter(searchParams, FilterChainType.Or));
-                    filter = Builders<Recipe>.Filter.Or(filter, orFilter);
-                }
-                if (categoriesList.Count() > 0)
-                {
-                    var andFilter = Builders<Recipe>.Filter.And(
-                        ChainingSearchFilter(categoriesList, FilterChainType.And));
-                    filter = Builders<Recipe>.Filter.And(filter, andFilter);
-                }
-                return await _recipeCollection.Find(filter).Skip(page * 10).Limit(10).ToListAsync();
+                return await _recipeRepository.GetRecipesSearch(filter, searchParams, categoriesList, page);
             }
             return [];
         }
 
         public async Task<IEnumerable<Recipe>> GetRecipesLiked(string userId, GetRecipeSearchRequest request, int page)
         {
-            Console.WriteLine("inside service");
             var searchTerm = request.searchTerm;
             var categoriesList = request.categories;
-            string pattern = @"[.,!?;'\s]+";
-            var searchParams = Regex.Split(searchTerm, pattern)
-                .Where(s => s.Length > 0).ToArray();
+            var searchParams = StrUtils.SplitSpecialCharacters(searchTerm);
             var likedRecipeIds = _userCollection.Find(s => s.id == userId)
                 .Project(s => s.likedRecipeIds).FirstOrDefault();
             if(!likedRecipeIds.IsNullOrEmpty())
             {
                 var filter = Builders<Recipe>.Filter.In(s => s.id, likedRecipeIds);
-                if (searchParams.Length > 0)
-                {
-                    var orFilter = Builders<Recipe>.Filter.Or(
-                                           ChainingSearchFilter(searchParams, FilterChainType.Or));
-                    filter = Builders<Recipe>.Filter.Or(filter, orFilter);
-                }
-                if (categoriesList.Count() > 0)
-                {
-                    var andFilter = Builders<Recipe>.Filter.And(
-                                           ChainingSearchFilter(categoriesList, FilterChainType.And));
-                    filter = Builders<Recipe>.Filter.And(filter, andFilter);
-                }
-                return await _recipeCollection.Find(filter).Skip(page * 10).Limit(10).ToListAsync();
+                return await _recipeRepository.GetRecipesSearch(filter, searchParams, categoriesList, page);
             }
             return [];
         }
-        private List<FilterDefinition<Recipe>> ChainingSearchFilter(IEnumerable<string> searchParams, FilterChainType chainType)
+        public async Task<IEnumerable<Recipe>> GetRecipesOwned(string userId, GetRecipeSearchRequest request, int page)
         {
-            List<FilterDefinition<Recipe>> subfilters = new List<FilterDefinition<Recipe>>();
-            if (searchParams.Count() > 0)
+            var searchTerm = request.searchTerm;
+            var categoriesList = request.categories;
+            var searchParams = StrUtils.SplitSpecialCharacters(searchTerm);
+            var ownedRecipeIds = _userCollection.Find(s => s.id == userId)
+                .Project(s => s.recipeIds).FirstOrDefault();
+            if (!ownedRecipeIds.IsNullOrEmpty())
             {
-                if(chainType == FilterChainType.And)
-                {
-                    foreach (string str in searchParams)
-                    {
-                        var regex = new BsonRegularExpression(new Regex(Regex.Escape(str), RegexOptions.IgnoreCase));
-                        subfilters.Add(Builders<Recipe>.Filter.Regex(s => s.categories, regex));
-                    }
-                }
-                else
-                {
-                    foreach (string str in searchParams)
-                    {
-                        var regex = new BsonRegularExpression(new Regex(Regex.Escape(str), RegexOptions.IgnoreCase));
-                        subfilters.Add(Builders<Recipe>.Filter.Regex(s => s.categories, regex));
-                    }
-                }
+                var filter = Builders<Recipe>.Filter.In(s => s.id, ownedRecipeIds);
+                return await _recipeRepository.GetRecipesSearch(filter, searchParams, categoriesList, page);
             }
-            return subfilters;
+            return [];
         }
 
     }

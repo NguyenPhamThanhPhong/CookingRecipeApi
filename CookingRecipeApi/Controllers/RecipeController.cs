@@ -48,6 +48,19 @@ namespace CookingRecipeApi.Controllers
             return Ok(recipes);
         }
         [Authorize]
+        [HttpGet("get-owned-recipes")]
+        public async Task<IActionResult> GetOwned([FromQuery] List<string> categories, [FromQuery] string? searchTerm, [FromQuery] int page=0)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("request invalid");
+            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userID == null)
+                return Unauthorized("userId not found in token");
+            GetRecipeSearchRequest request = new GetRecipeSearchRequest() { categories = categories, searchTerm = searchTerm ?? "" };
+            var recipes = await _recipeService.GetRecipesOwned(userID, request, page);
+            return Ok(recipes);
+        }
+        [Authorize]
         [HttpGet("get-saved-recipes")]
         public async Task<IActionResult> GetSavedRecipes([FromQuery] List<string> categories, [FromQuery] string? searchTerm, [FromQuery] int page)
         {

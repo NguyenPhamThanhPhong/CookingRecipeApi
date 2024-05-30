@@ -1,7 +1,9 @@
 ﻿using CookingRecipeApi.Configs;
 using CookingRecipeApi.Models;
 using CookingRecipeApi.Repositories.Interfaces;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Text.RegularExpressions;
 
 namespace CookingRecipeApi.Repositories.Repos
 {
@@ -48,6 +50,12 @@ namespace CookingRecipeApi.Repositories.Repos
         {
             var result = await _userCollection.ReplaceOneAsync(u => u.id == user.id, user);
             return (result.IsAcknowledged && result.ModifiedCount > 0)?user:null ;
+        }
+        public async Task<IEnumerable<User>> SearchUser(string searchParam,int page)
+        {
+            var filter = Builders<User>.Filter.Regex(u => u.profileInfo.fullName, new BsonRegularExpression(new Regex(searchParam, RegexOptions.IgnoreCase)));
+            var users = await _userCollection.Find(filter).Skip(page * 10).Limit(10).ToListAsync();
+            return users;
         }
     }
 }

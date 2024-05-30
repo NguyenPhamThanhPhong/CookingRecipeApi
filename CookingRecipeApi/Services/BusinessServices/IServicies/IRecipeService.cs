@@ -11,6 +11,7 @@ namespace CookingRecipeApi.Services.BusinessServices.IServicies
         Task<Recipe?> GetRecipeById(string id);
         Task<IEnumerable<Recipe>> GetRecipesSaved(string userId,GetRecipeSearchRequest request,int page);
         Task<IEnumerable<Recipe>> GetRecipesLiked(string userId, GetRecipeSearchRequest request, int page);
+        Task<IEnumerable<Recipe>> GetRecipesOwned(string userId, GetRecipeSearchRequest request, int page);
         Task<IEnumerable<Recipe>> GetRecipesSearch(GetRecipeSearchRequest request,int page);
         Task<IEnumerable<Recipe>> GetRecipesFromIds(IEnumerable<string> recipeIds);
         Task<Recipe?> UpdateRecipe(RecipeUpdateRequest request, string userId);
