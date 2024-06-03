@@ -14,10 +14,10 @@ namespace CookingRecipeApi.Services.BusinessServices.IServicies
         Task<IEnumerable<Recipe>> GetRecipesOwned(string userId, GetRecipeSearchRequest request, int page);
         Task<IEnumerable<Recipe>> GetRecipesSearch(GetRecipeSearchRequest request,int page);
         Task<IEnumerable<Recipe>> GetRecipesFromIds(IEnumerable<string> recipeIds);
+        Task<IEnumerable<Recipe>> GetRecipesFromLikes(bool isVegan);
         Task<Recipe?> UpdateRecipe(RecipeUpdateRequest request, string userId);
         Task<bool> DeleteRecipe(string id, string userId);
         Task NotifyRecipe(string userId, string userfullName, Recipe recipe, RecipeNotificationType type);
-        Task<IEnumerable<Recipe>> GetRecipesFromLikes();
         Task<bool> SaveRecipe(string userId, string recipeId,bool option);
         Task<bool> LikeRecipe(string userId, string recipeId, bool option);
     }

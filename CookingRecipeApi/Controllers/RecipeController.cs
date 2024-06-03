@@ -34,10 +34,17 @@ namespace CookingRecipeApi.Controllers
                 return NotFound("recipe not found in database");
             return Ok(recipe);
         }
+        [Authorize]
         [HttpGet("get-from-likes")]
         public async Task<IActionResult> GetFeedRecipeFromLike()
         {
-            var recipes = await _recipeService.GetRecipesFromLikes();
+            bool isVegan = false;
+            string? isVeganstr = User.FindFirst("isVegan")?.Value;
+            if(isVeganstr!=null)
+            {
+                isVegan = bool.Parse(isVeganstr);
+            }
+            var recipes = await _recipeService.GetRecipesFromLikes(isVegan);
             return Ok(recipes);
         }
         [HttpGet("get-from-ids")]
@@ -86,10 +93,20 @@ namespace CookingRecipeApi.Controllers
             var recipes = await _recipeService.GetRecipesLiked(userID, request, page);
             return Ok(recipes);
         }
+        [Authorize]
         [HttpGet("search")]
-        public async Task<IActionResult> SearchbyCategory([FromQuery] List<string> categories, [FromQuery] string? searchTerm, [FromQuery] int page)
+        public async Task<IActionResult> SearchbyCategory(
+            [FromQuery] List<string> categories, [FromQuery] string? searchTerm, 
+            [FromQuery] int page)
         {
-            GetRecipeSearchRequest request = new GetRecipeSearchRequest() { categories = categories, searchTerm = searchTerm ?? "" };
+            bool isVegan = false;
+            string? isVeganstr = User.FindFirst("isVegan")?.Value;
+            if (isVeganstr != null)
+            {
+                isVegan = bool.Parse(isVeganstr);
+            }
+            GetRecipeSearchRequest request = new GetRecipeSearchRequest() 
+            { categories = categories, searchTerm = searchTerm ?? "", isVegan=isVegan};
             var recipes = await _recipeService.GetRecipesSearch(request, page);
             return Ok(recipes);
         }

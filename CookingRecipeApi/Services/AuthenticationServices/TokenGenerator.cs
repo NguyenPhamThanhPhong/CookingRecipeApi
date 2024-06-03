@@ -39,9 +39,10 @@ namespace CookingRecipeApi.Services.AuthenticationServices
                 new Claim(ClaimTypes.NameIdentifier,user.id),
                 new Claim(ClaimTypes.Email,user.authenticationInfo.email??""),
                 new Claim(ClaimTypes.Name,user.profileInfo.fullName),
-                new Claim(ClaimTypes.AuthenticationMethod,user.authenticationInfo.linkedAccountType??"default"),
+                new Claim("isVegan",user.profileInfo.isVegan.ToString())
+                //new Claim(ClaimTypes.AuthenticationMethod,user.authenticationInfo.linkedAccountType??"default"),
             };
-            Console.WriteLine(JsonSerializer.Serialize(claims));
+            //Console.WriteLine(JsonSerializer.Serialize(claims));
 
             JwtSecurityToken token = new JwtSecurityToken(
                 _authenticationConfigs.Issuer,

@@ -53,8 +53,9 @@ namespace CookingRecipeApi.Repositories.Repos
         }
         public async Task<IEnumerable<User>> SearchUser(string searchParam,int page)
         {
+            var sort = Builders<User>.Sort.Descending(u => u.followerIds.Count);
             var filter = Builders<User>.Filter.Regex(u => u.profileInfo.fullName, new BsonRegularExpression(new Regex(searchParam, RegexOptions.IgnoreCase)));
-            var users = await _userCollection.Find(filter).Skip(page * 10).Limit(10).ToListAsync();
+            var users = await _userCollection.Find(filter).Sort(sort).Skip(page * 10).Limit(10).ToListAsync();
             return users;
         }
     }

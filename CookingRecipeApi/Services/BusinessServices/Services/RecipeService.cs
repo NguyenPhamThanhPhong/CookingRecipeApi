@@ -107,10 +107,11 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             return Task.CompletedTask;
         }
 
-        public async Task<IEnumerable<Recipe>> GetRecipesFromLikes()
+        public async Task<IEnumerable<Recipe>> GetRecipesFromLikes(bool isVegan)
         {
+            var filter = Builders<Recipe>.Filter.Eq(s => s.isVegan, isVegan);
             var sort = Builders<Recipe>.Sort.Descending(s => s.likes);
-            var recipes = await _recipeCollection.Find(s => true).Sort(sort).Limit(10).ToListAsync();
+            var recipes = await _recipeCollection.Find(filter).Sort(sort).Limit(10).ToListAsync();
             return recipes;
         }
         public async Task<bool> SaveRecipe(string userId,string recipeId,bool option)
@@ -126,7 +127,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var searchTerm = request.searchTerm;
             var categoriesList = request.categories;
             var searchParams = StrUtils.SplitSpecialCharacters(searchTerm);
-            var filter = Builders<Recipe>.Filter.Empty;
+            var filter = Builders<Recipe>.Filter.Eq(s => s.isVegan, request.isVegan);
             return await _recipeRepository.GetRecipesSearch(filter, searchParams, categoriesList, page);
         }
 

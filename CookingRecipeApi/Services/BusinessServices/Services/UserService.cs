@@ -60,6 +60,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             string cleanSearch = Regex.Replace(search, "[^a-zA-Z0-9]", "");
             var regexPattern = new BsonRegularExpression(Regex.Escape(cleanSearch), "i");
             var filter = Builders<User>.Filter.Regex(s => s.profileInfo.fullName, regexPattern);
+            var sort = Builders<User>.Sort.Descending(s => s.followerIds);
             var projection = Builders<User>.Projection.Expression(s => new UserProfileResponse
             {
                 id = s.id,
@@ -69,7 +70,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
                 followingCount = s.followingIds.Count,
                 followerCount = s.followerIds.Count
             });
-            var profiles = await _userCollection.Find(filter).Skip(page).Limit(20).Project(projection).ToListAsync();
+            var profiles = await _userCollection.Find(filter).Sort(sort).Skip(page).Limit(20).Project(projection).ToListAsync();
             return profiles;
         }
 
