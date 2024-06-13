@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CookingRecipeApi.Models;
+using CookingRecipeApi.RequestsResponses.Requests.NotificationRequestsDTO;
 using CookingRecipeApi.Services.BusinessServices.IServicies;
 using CookingRecipeApi.Services.RabbitMQServices;
 using Microsoft.AspNetCore.Authorization;
@@ -15,12 +16,15 @@ namespace CookingRecipeApi.Controllers
     {
         private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
+        private readonly NotificationTaskProducer _notificationTaskProducer;
 
-        public NotificationController(INotificationService notificationService, 
-            IMapper mapper)
+        public NotificationController(INotificationService notificationService,
+            IMapper mapper,
+            NotificationTaskProducer notificationTaskProducer)
         {
             _notificationService = notificationService;
             _mapper = mapper;
+            _notificationTaskProducer = notificationTaskProducer;
         }
         [HttpGet("{page}")]
         [Authorize]
@@ -59,23 +63,23 @@ namespace CookingRecipeApi.Controllers
             var result = await _notificationService.DeleteNotification(offSet, userId);
             return result ? Ok() : BadRequest("not found user");
         }
-        //[HttpPost("make-doom-notification-test/{message}")]
-        //public IActionResult DoomNotification([FromBody] List<string> userIds, string message)
-        //{
-        //    var notification = new Notification()
-        //    {
-        //        content = message,
-        //        createdAt = DateTime.UtcNow,
-        //        isRead = false,
-        //        offSet = 0,
-        //        redirectPath = "/hello",
-        //        title = "Doom Notification"
-        //    };
-        //    foreach (var userId in userIds)
-        //    {
-        //        _notificationTaskProducer.EnqueueNotification(notification,userId);
-        //    }
-        //    return Ok("NotificationController");
-        //}
+        [HttpPost("make-doom-notification-test")]
+        public IActionResult DoomNotification([FromBody] NotificationCreateRequest request)
+        {
+            var notification = new Notification()
+            {
+                offSet = 0,
+                title = request.title,
+                content = request.content,
+                createdAt = DateTime.UtcNow,
+                isRead = false,
+                redirectPath = request.redirectPath,
+            };
+            foreach (var userId in request.userIds)
+            {
+                _notificationTaskProducer.EnqueueNotification(notification, userId);
+            }
+            return Ok("NotificationController");
+        }
     }
 }

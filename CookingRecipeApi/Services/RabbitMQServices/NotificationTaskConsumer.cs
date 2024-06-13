@@ -96,7 +96,7 @@ namespace CookingRecipeApi.Services.RabbitMQServices
                 try
                 {
                     var notificationTask = System.Text.Json.JsonSerializer.Deserialize<NotificationTask>(message);
-                    Console.WriteLine($" [x] Received {0}", notificationTask?.UserId??"");
+                    //Console.WriteLine($" [x] Received {0}", notificationTask?.UserId??"");
                     if (notificationTask != null)
                     {
                         await _sendNotification(notificationTask.Notification, notificationTask.UserId);
@@ -112,8 +112,6 @@ namespace CookingRecipeApi.Services.RabbitMQServices
                 }
             };
             _channel.BasicConsume(queue: _notificationQueueName, autoAck: true, consumer: notificationConsumer);
-            
-            
 
         }
 

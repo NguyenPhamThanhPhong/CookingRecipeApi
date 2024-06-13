@@ -16,7 +16,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         private readonly IMongoCollection<User> _userCollection;
         private readonly INotificationBatchRepository _notificationBatchRepository;
         private readonly IHubContext<NotificationHub> _hubContext;
-        private readonly ProjectionDefinition<User,List<string>>? _projection = Builders<User>.Projection.Expression(x => x.followerIds);
+        private readonly ProjectionDefinition<User, List<string>>? _projection = Builders<User>.Projection.Expression(x => x.followerIds);
         private readonly int _batchSize;
         public NotificationService(INotificationBatchRepository notificationBatchRepository,
             DatabaseConfigs databaseConfigs,
@@ -47,8 +47,8 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         public async Task<Tuple<string, List<string>>?> DetectUserIdtoNotification(string userId)
         {
             var filter = Builders<User>.Filter.Eq(x => x.id, userId);
-            var projection = Builders<User>.Projection.Expression(x => Tuple.Create(x.profileInfo.avatarUrl,x.followerIds));
-            Tuple<string,List<string>>? followers = await _userCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
+            var projection = Builders<User>.Projection.Expression(x => Tuple.Create(x.profileInfo.avatarUrl, x.followerIds));
+            Tuple<string, List<string>>? followers = await _userCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
             return followers;
         }
 
@@ -57,7 +57,7 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             return _notificationBatchRepository.GetNotifications(userId, page);
         }
 
-        public Task<bool> MarkRead(int offSet, string userId,bool isRead)
+        public async Task<bool> MarkRead(int offSet, string userId, bool isRead)
         {
             try
             {
@@ -65,31 +65,30 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
                 int item_offset = offSet % _batchSize;
                 var filter = Builders<NotificationBatch>.Filter.Where(
                     x => x.userId == userId
-                    && x.page == page)
-                    & Builders<NotificationBatch>.Filter.Exists(
-                        x => x.notifications[item_offset]);
-                //var temp = _notificationBatchCollection.Find(filter).FirstOrDefault();
+                    && x.page == page
+                    && x.count > item_offset
+                    && x.notifications[item_offset] != null);
                 var update = Builders<NotificationBatch>.Update.Set(
                     x => x.notifications[item_offset].isRead, isRead);
-                return _notificationBatchCollection.UpdateOneAsync(filter, update)
-                    .ContinueWith(x=> x.Result.ModifiedCount > 0);
+                var updateResult = await _notificationBatchCollection.UpdateOneAsync(filter, update);
+                return updateResult?.ModifiedCount > 0;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return Task.FromResult(false);
+                return false;
             };
         }
 
-        public async Task PushNotification(Notification notification,string userId)
+        public async Task PushNotification(Notification notification, string userId)
         {
             try
             {
-                var result = await _notificationBatchRepository.PushNotification(userId, notification );
+                var result = await _notificationBatchRepository.PushNotification(userId, notification);
                 await _hubContext.Clients.All.SendAsync("ReceiveNotification", notification);
                 await this.NotifytoUserDevices(userId, notification);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }

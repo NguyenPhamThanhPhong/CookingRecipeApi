@@ -2,6 +2,7 @@
 using CookingRecipeApi.Models;
 using CookingRecipeApi.Repositories.Interfaces;
 using MongoDB.Driver;
+using System.Text.Json;
 
 namespace CookingRecipeApi.Repositories.Repos
 {
@@ -63,6 +64,7 @@ namespace CookingRecipeApi.Repositories.Repos
             using(var cursor = await _notificationBatchCollection.FindAsync(filter, new FindOptions<NotificationBatch> { Sort = sort }))
             {
                 var notificationBatch = await cursor.FirstOrDefaultAsync();
+                //Console.WriteLine(JsonSerializer.Serialize(notificationBatch));
                 if (notificationBatch == null)
                 {
                     notification.offSet = 0;
@@ -76,7 +78,8 @@ namespace CookingRecipeApi.Repositories.Repos
                     await _notificationBatchCollection.InsertOneAsync(notificationBatch);
                     return notification;
                 }
-                if(notificationBatch.notifications.Count < _notificationBatchSize)
+                //Console.WriteLine($"batchsize is : {_notificationBatchSize}");
+                if(notificationBatch.count < _notificationBatchSize)
                 {
                     notification.offSet = notificationBatch.notifications.Count;
                     var update = Builders<NotificationBatch>.Update.Combine(
