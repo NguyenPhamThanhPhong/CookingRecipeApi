@@ -63,7 +63,7 @@ namespace CookingRecipeApi.Controllers
             var result = await _notificationService.DeleteNotification(offSet, userId);
             return result ? Ok() : BadRequest("not found user");
         }
-        [HttpPost("make-doom-notification-test")]
+        [HttpPost("create-notifications")]
         public IActionResult DoomNotification([FromBody] NotificationCreateRequest request)
         {
             var notification = new Notification()
