@@ -66,8 +66,10 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
                 var filter = Builders<NotificationBatch>.Filter.Where(
                     x => x.userId == userId
                     && x.page == page
-                    && x.count > item_offset
-                    && x.notifications[item_offset] != null);
+                    && x.count > item_offset);
+                //& Builders<NotificationBatch>.Filter.Ne($"notifications.{item_offset}", BsonNull.Value);
+                //var testItem = await _notificationBatchCollection.Find(filter).FirstOrDefaultAsync();
+                //Console.WriteLine(JsonSerializer.Serialize(testItem));
                 var update = Builders<NotificationBatch>.Update.Set(
                     x => x.notifications[item_offset].isRead, isRead);
                 var updateResult = await _notificationBatchCollection.UpdateOneAsync(filter, update);
@@ -78,6 +80,8 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
                 Console.WriteLine(ex.Message);
                 return false;
             };
+
+
         }
 
         public async Task PushNotification(Notification notification, string userId)
