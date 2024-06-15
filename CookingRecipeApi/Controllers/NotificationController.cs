@@ -51,7 +51,7 @@ namespace CookingRecipeApi.Controllers
             Console.WriteLine(result);
             return result?Ok():BadRequest("not found user");
         }
-        [HttpDelete("/{offSet}")]
+        [HttpDelete("{offSet}")]
         [Authorize]
         public async Task<IActionResult> DeleteNotification(int offSet)
         {

@@ -37,22 +37,35 @@ namespace CookingRecipeApi.Repositories.Repos
             var sort = Builders<NotificationBatch>.Sort.Descending(n => n.page);
             // help me here copilot
             var manyNotifications = await _notificationBatchCollection
-                .Find(filter).Project(projection).Sort(sort).Limit(2).Skip(page).ToListAsync();
-            switch (manyNotifications?.Count)
-            {
-                case null:
-                    return new List<Notification?>();
-                case 0:
-                    return new List<Notification?>();
-                case 1:
-                    return manyNotifications[0];
-                default:
-                    // if at least 2 pages
-                    //check if first page has enough to return to client
-                    // if return 2 pages
-                    return (manyNotifications[0].Count < _clientConstants.NOTIFICATION_PAGE_MIN_SIZE) 
-                        ? manyNotifications[0] : manyNotifications.SelectMany(n => n);
-            }
+                .Find(filter).Project(projection).Sort(sort).Limit(1).Skip(page).FirstOrDefaultAsync();
+            if(manyNotifications == null)
+                return new List<Notification?>();
+            manyNotifications.Reverse();
+            return manyNotifications;
+            //switch (manyNotifications?.Count)
+            //{
+            //    case null:
+            //        return new List<Notification?>();
+            //    case 0:
+            //        return new List<Notification?>();
+            //    case 1:
+            //        return manyNotifications[0];
+            //    default: // list<list<notification>> 2 pages
+            //        // if at least 2 pages
+            //        //check if first page has enough to return to client
+            //        // if so return 2 pages
+            //        if (manyNotifications[0].Count < _clientConstants.NOTIFICATION_PAGE_MIN_SIZE)
+            //        {
+            //            var item = manyNotifications.SelectMany(n => n);
+            //            return item;
+            //        }
+            //        else
+            //        {
+            //            return manyNotifications[0];
+            //        }
+            //        //return (manyNotifications[0].Count < _clientConstants.NOTIFICATION_PAGE_MIN_SIZE) 
+            //        //    ? manyNotifications[0] : manyNotifications.SelectMany(n => n);
+            //}
         }
 
         public async Task<Notification> PushNotification(string userId, Notification notification)
