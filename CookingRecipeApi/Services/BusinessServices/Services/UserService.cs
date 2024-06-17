@@ -111,18 +111,25 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             UpdateDefinition<User> updateSelf;
             if(option)
             {
-                updateSelf = Builders<User>.Update.Push(s => s.followingIds, id);
+                var preUpdateSelf = Builders<User>.Update.Pull(s => s.followingIds, followId);
+                var preUpdateTarget = Builders<User>.Update.Pull(s => s.followerIds, id);
+                var preCheckResult = await Task.WhenAll(_userCollection.UpdateOneAsync(selfFilter, preUpdateSelf),
+                                                     _userCollection.UpdateOneAsync(targetFilter, preUpdateTarget));
+                bool preCheck = !(preCheckResult.All(s => s.IsAcknowledged && s.ModifiedCount > 0));
+
+                updateSelf = Builders<User>.Update.Push(s => s.followingIds, followId);
                 updateTarget = Builders<User>.Update.Push(s => s.followerIds, id);
                 var updateResults = await Task.WhenAll(_userCollection.UpdateOneAsync(selfFilter, updateSelf),
                                        _userCollection.UpdateOneAsync(targetFilter, updateTarget));
-                return updateResults.All(s => s.IsAcknowledged && s.ModifiedCount > 0);
+                var afterCheck = updateResults.All(s => s.IsAcknowledged && s.ModifiedCount > 0);
+                return preCheck && afterCheck;
             }
             else
             {
-                updateSelf = Builders<User>.Update.Pull(s => s.followingIds, id);
+                updateSelf = Builders<User>.Update.Pull(s => s.followingIds, followId);
                 updateTarget = Builders<User>.Update.Pull(s => s.followerIds, id);
-                var updateResults = await Task.WhenAll(_userCollection.UpdateOneAsync(selfFilter, Builders<User>.Update.Pull(s => s.followingIds, id)),
-                                                      _userCollection.UpdateOneAsync(targetFilter, Builders<User>.Update.Pull(s => s.followerIds, id)));
+                var updateResults = await Task.WhenAll(_userCollection.UpdateOneAsync(selfFilter, updateSelf),
+                                                      _userCollection.UpdateOneAsync(targetFilter, updateTarget));
                 return updateResults.All(s => s.IsAcknowledged && s.ModifiedCount > 0);
             }
         }
