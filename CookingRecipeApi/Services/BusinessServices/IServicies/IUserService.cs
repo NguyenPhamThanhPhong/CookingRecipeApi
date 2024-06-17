@@ -7,6 +7,7 @@ namespace CookingRecipeApi.Services.BusinessServices.IServicies
     public interface IUserService
     {
         Task<UserProfileResponse> getProfilebyId(string id);
+        Task<IEnumerable<UserProfileResponse>> getProfileFromIds(IEnumerable<string> ids);
         Task<User?> getSelf(string id);
         Task<IEnumerable<UserProfileResponse>> getProfileSearch(string search, int page);
         Task<ProfileInformation> UpdateProfileBasicbyId(UserUpdateRequest request, string userId);

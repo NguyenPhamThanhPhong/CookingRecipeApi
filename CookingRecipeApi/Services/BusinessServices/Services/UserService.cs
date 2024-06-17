@@ -54,6 +54,22 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
             var profile = await _userCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
             return profile;
         }
+        public async Task<IEnumerable<UserProfileResponse>> getProfileFromIds(IEnumerable<string> ids)
+        {
+            var filter = Builders<User>.Filter.In(s => s.id, ids);
+            var projection = Builders<User>.Projection.Expression(s => new UserProfileResponse
+            {
+                id = s.id,
+                createdAt = s.createdAt,
+                profileInfo = s.profileInfo,
+                recipeIds = s.recipeIds,
+                followingCount = s.followingIds.Count,
+                followerCount = s.followerIds.Count
+            });
+            var profiles = await _userCollection.Find(filter).Project(projection).ToListAsync();
+            return profiles;
+        }
+
 
         public async Task<IEnumerable<UserProfileResponse>> getProfileSearch(string search,int page)
         {

@@ -46,6 +46,16 @@ namespace CookingRecipeApi.Controllers
             UserProfileResponse profile = await _userService.getProfilebyId(id);
             return Ok(profile);
         }
+        [HttpGet("get-by-ids")]
+        public async Task<IActionResult> GetProfilebyIds([FromQuery] IEnumerable<string> ids)
+        {
+            if (ids.Count() > 10)
+            {
+                ids = ids.Take(10);
+            }
+            var profiles = await _userService.getProfileFromIds(ids);
+            return Ok(profiles);
+        }
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string? searchTerm, [FromQuery] int page)
         {
