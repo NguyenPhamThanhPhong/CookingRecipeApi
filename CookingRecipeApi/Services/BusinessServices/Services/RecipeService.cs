@@ -12,6 +12,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 
 namespace CookingRecipeApi.Services.BusinessServices.Services
 {
@@ -62,7 +63,11 @@ namespace CookingRecipeApi.Services.BusinessServices.Services
         }
         public async Task<Recipe?> UpdateRecipe(RecipeUpdateRequest request, string userID)
         {
+            //Console.WriteLine("Request is ::::::");
+            //Console.WriteLine(JsonSerializer.Serialize(request));
+            //Console.WriteLine("recipe IS:::::::");
             var recipe = _mapper.Map<Recipe>(request);
+            recipe.userId = userID;
             if (request.files != null && request.files.Count()>0)
             {
                 var totalFilesSize = request.files.Sum(f => f.Length);

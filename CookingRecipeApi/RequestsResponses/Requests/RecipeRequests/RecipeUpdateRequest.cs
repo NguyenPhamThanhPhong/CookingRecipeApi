@@ -6,6 +6,8 @@ namespace CookingRecipeApi.RequestsResponses.Requests.RecipeRequests
 {
     public class RecipeUpdateRequest
     {
+        [Required]
+        public string id { get; set; }
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         [Required]
         // anotation validate string lenght 1-50
@@ -27,8 +29,6 @@ namespace CookingRecipeApi.RequestsResponses.Requests.RecipeRequests
         public List<string> ingredients { get; set; }
         public bool isPublished { get; set; } = false;
         // must provide to do replace async
-        public DateTime createdAt { get; set; }
-
         public bool isVegan { get; set; }
 
     }

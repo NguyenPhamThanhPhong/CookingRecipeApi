@@ -159,6 +159,7 @@ namespace CookingRecipeApi.Controllers
                 return BadRequest("request invalid");
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var name = User.FindFirst(ClaimTypes.Name)?.Value;
+            Console.WriteLine($"userID={userID} name={name}");
             if (userID == null || name == null)
                 return Unauthorized();
             Recipe? recipe = await _recipeService.UpdateRecipe(request, userID);
